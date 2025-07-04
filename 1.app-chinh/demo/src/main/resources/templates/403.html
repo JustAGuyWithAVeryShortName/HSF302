@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error 403 - Access Denied</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #dc3545; /* Red for error */
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .status {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        .details {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>403 - Access Denied!</h1>
+    <p>You do not have the necessary permissions to view this page or perform this action.</p>
+    <p>Please ensure you are logged in with an account that has the required access level.</p>
+
+    <div class="status">
+        Error Status: <span th:text="${status ?: '403'}">403</span>
+        <span th:if="${error}"> (<span th:text="${error}">Forbidden</span>)</span>
+    </div>
+
+    <div class="details" th:if="${message}">
+        <p><strong>Message:</strong> <span th:text="${message}"></span></p>
+    </div>
+
+    <p><a href="/">Go to Home Page</a></p>
+    <p th:if="${#request.userPrincipal != null}"><a href="/spring-security-logout">Logout</a> if you wish to try another account.</p>
+</div>
+</body>
+</html>

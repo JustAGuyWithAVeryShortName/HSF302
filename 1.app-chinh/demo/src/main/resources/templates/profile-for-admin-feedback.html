@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile - SmokeLite (Admin View)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #e8f0ff, #f5f9ff);
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .profile-container {
+            max-width: 700px;
+            margin: 4rem auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #004a99;
+            margin-bottom: 2rem;
+        }
+        .profile-item {
+            margin-bottom: 1rem;
+        }
+        .label {
+            font-weight: bold;
+            color: #333;
+        }
+        .value {
+            color: #555;
+        }
+        a {
+            text-decoration: none;
+            color: #004a99;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="profile-container">
+    <h2>Account Profile (Admin View)</h2>
+
+
+    <div class="profile-item">
+        <span class="label">Username:</span> <span class="value" th:text="${user.username}"></span>
+    </div>
+
+
+    <div class="profile-item">
+        <span class="label">Password:</span> <span class="value" th:text="${user.password}"></span>
+    </div>
+    <div class="profile-item">
+        <span class="label">Email:</span> <span class="value" th:text="${user.email}"></span>
+    </div>
+
+    <div class="profile-item">
+        <span class="label">Full Name:</span> <span class="value" th:text="|${user.lastName} ${user.firstName}|"></span>
+    </div>
+
+    <div class="profile-item">
+        <span class="label">Gender:</span> <span class="value" th:text="${user.gender}"></span>
+    </div>
+
+    <div class="profile-item">
+        <span class="label">Date of Birth:</span> <span class="value" th:text="${user.dateOfBirth}"></span>
+    </div>
+
+    <div class="profile-item">
+        <span class="label">Role:</span> <span class="value" th:text="${user.role}"></span>
+    </div>
+
+    <div class="profile-item" th:if="${user.role.name() == 'Member'}">
+        <span class="label">Type:</span> <span class="value" th:text="${user.member}">FREE</span>
+    </div>
+
+    <div class="text-center mt-4">
+        <a th:href="@{/admin/ratings}" class="btn btn-secondary">Back to Feedback & Rating</a>
+    </div>
+</div>
+
+</body>
+</html>

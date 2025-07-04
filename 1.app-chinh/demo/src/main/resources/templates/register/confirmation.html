@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Successful</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+    <style>
+        :root {
+            --primary-color: #004a99;
+            --primary-hover: #0066cc;
+            --primary-active: #003d80;
+            --background: #f0f2f5;
+            --input-border: #ccc;
+            --input-focus: #004a99;
+            --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --highlight-color: #ff9900; /* Màu nổi bật mới */
+            --highlight-shadow: rgba(255, 153, 0, 0.4); /* Bóng cho màu nổi bật */
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #e8f0ff, #f5f9ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .success-container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            padding: 2.5rem 2rem;
+            border-radius: 15px;
+            box-shadow:  var(--shadow-light);
+            animation: fadeIn 0.5s ease-in-out;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            } to {
+                  opacity: 1;
+                  transform: translateY(0);
+              }
+        }
+
+        .success-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .success-container h3 {
+            margin-bottom: 25px;
+            color: var(--primary-color);
+            line-height: 1.5;
+            font-size: 1.6rem;
+            padding-top: 15px;
+        }
+
+        .success-container p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            color: #555;
+        }
+
+        /* Styles for the highlighted username */
+        .highlight-username {
+            font-weight: bold;
+            color: var(--highlight-color); /* Sử dụng màu nổi bật mới */
+            font-size: 1.25rem; /* Kích thước lớn hơn một chút */
+            display: inline-block; /* Để áp dụng padding và shadow */
+            padding: 0 8px; /* Thêm padding nhẹ xung quanh tên */
+            border-radius: 5px; /* Bo góc nhẹ */
+            background-color: rgba(255, 153, 0, 0.1); /* Màu nền nhẹ cho sự nổi bật tinh tế */
+            box-shadow: 0 2px 5px var(--highlight-shadow); /* Bóng đổ nhẹ */
+            transform: translateY(-2px); /* Nâng nhẹ tên lên */
+            animation: pulse 1.5s infinite alternate; /* Hiệu ứng nhấp nháy nhẹ */
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translateY(0);
+                box-shadow: 0 2px 5px var(--highlight-shadow);
+            }
+            100% {
+                transform: translateY(-5px);
+                box-shadow: 0 5px 15px var(--highlight-shadow);
+            }
+        }
+
+
+        .success-container a {
+            display: inline-block;
+            padding: 12px 25px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            font-size: 1.05rem;
+            box-shadow: 0 4px 10px rgba(0, 74, 153, 0.2);
+        }
+
+        .success-container a:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 74, 153, 0.3);
+        }
+
+        .success-container a:active {
+            transform: scale(0.98) translateY(0);
+            background: var(--primary-active);
+            box-shadow: 0 2px 5px rgba(0, 74, 153, 0.2);
+        }
+    </style>
+</head>
+<body>
+<div class="success-container">
+    <h3>Congratulations!</h3>
+    <p>Your new account for <span class="highlight-username" th:text="${session.user.getUsername()}"></span> has been successfully registered.</p>
+    <a th:href="@{/login}">Log in to your new account!</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+</body>
+</html>

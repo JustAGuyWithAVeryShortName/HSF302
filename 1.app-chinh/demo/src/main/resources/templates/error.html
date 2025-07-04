@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Something Went Wrong</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #dc3545; /* A common error color */
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .status {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        .details {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Oops! Something went wrong.</h1>
+    <p>We apologize for the inconvenience. Our team has been notified and is working to fix the issue.</p>
+    <p>Please try again later or return to the home page.</p>
+
+    <div class="status" th:if="${status}"> Error Status: <span th:text="${status}"></span>
+        <span th:if="${error}"> (<span th:text="${error}"></span>)</span>
+    </div>
+    <div class="details" th:if="${trace}">
+        <p><strong>Error Details (for developers):</strong></p>
+        <pre th:text="${trace}"></pre>
+    </div>
+    <div class="details" th:if="${message}">
+        <p><strong>Message:</strong> <span th:text="${message}"></span></p>
+    </div>
+
+
+    <p><a href="/">Go to Home Page</a></p>
+</div>
+</body>
+</html>

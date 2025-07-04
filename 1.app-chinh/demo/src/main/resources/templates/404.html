@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error 404 - Page Not Found</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #dc3545; /* Red for error */
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .large-404 { /* Style for the large, faded '404' */
+            font-size: 10em; /* Much larger */
+            font-weight: bold;
+            color: #e0e0e0; /* Lighter, faded color */
+            margin-top: -30px; /* Pull it up a bit */
+            margin-bottom: -30px; /* Pull it down a bit */
+            line-height: 1;
+        }
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .status {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        .details {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            display: inline-block;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        a:hover {
+            background-color: #0056b3;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="large-404">404</div> <h1>WE ARE SORRY, PAGE NOT FOUND!</h1>
+    <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+
+    <div class="status">
+        Error Status: <span th:text="${status ?: '404'}">404</span>
+        <span th:if="${error}"> (<span th:text="${error}">Not Found</span>)</span>
+    </div>
+
+    <div class="details" th:if="${message}">
+        <p><strong>Message:</strong> <span th:text="${message}"></span></p>
+    </div>
+
+    <p><a href="/">BACK TO HOMEPAGE</a></p>
+</div>
+</body>
+</html>

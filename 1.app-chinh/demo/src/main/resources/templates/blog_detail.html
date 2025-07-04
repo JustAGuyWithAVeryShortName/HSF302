@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${post.title}">Blog Detail</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f0f4f8, #ffffff);
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 50px auto;
+            padding: 40px;
+            background-color: #ffffff;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .blog-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #222;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .blog-image {
+            width: 100%;
+            height: auto;
+            border-radius: 14px;
+            margin: 30px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .blog-content {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #444;
+        }
+
+        .blog-content h3 {
+            margin-top: 30px;
+            color: #007bff;
+        }
+
+        .blog-content ul {
+            margin-left: 20px;
+            padding-left: 10px;
+        }
+
+        .blog-content li {
+            margin-bottom: 8px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            font-size: 16px;
+            color: #007bff;
+            text-decoration: none;
+            transition: 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+                margin: 30px 16px;
+            }
+
+            .blog-title {
+                font-size: 28px;
+            }
+
+            .blog-content {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="blog-title" th:text="${post.title}">Blog Title</h1>
+
+    <img th:src="@{${post.imageUrl}}" alt="Blog Image" class="blog-image" />
+
+    <div class="blog-content" th:utext="${post.content}">
+        <!-- Full blog HTML content rendered here -->
+    </div>
+
+    <a th:href="@{/home}" class="back-link">← Back to Home</a>
+</div>
+</body>
+</html>

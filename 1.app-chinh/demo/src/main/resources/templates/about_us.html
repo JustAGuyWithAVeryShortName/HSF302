@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us - SmokeLite</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/about_us.css}" />
+    <style>
+        /* CSS fade-up (bạn có thể thêm vào about_us.css) */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<header class="main-header">
+    <div class="logo-container">
+        <a th:href="@{/home}">
+            <img th:src="@{/images/1.png}" alt="SmokeLite Logo" class="logo" />
+        </a>
+    </div>
+    <nav class="main-nav">
+        <a th:href="@{/home}" class="nav-item">Home</a>
+        <a th:href="@{/member}" class="nav-item">Member</a>
+        <a th:href="@{/about_us}" class="nav-item active">About Us</a>
+
+        <div th:replace="~{fragments/noticeDropdown :: noticeDropdown}"></div>
+
+
+
+        <a th:href="@{/login}" class="nav-item" sec:authorize="!isAuthenticated()">Login</a>
+
+        <!-- Nếu đã đăng nhập -->
+        <div class="nav-item dropdown" sec:authorize="isAuthenticated()">
+            <button class="dropdown-toggle">
+                Hi, <span th:text="${fullName}">User</span> <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu">
+                <a th:href="@{/profile}" class="dropdown-item">Profile</a>
+                <a th:href="@{/dashboard}" class="dropdown-item">View Plan</a>
+
+                <th:block sec:authorize="isAuthenticated()">
+                    <th:block th:if="${isUsernameLogin}">
+                        <a th:href="@{/change-password}" class="dropdown-item">Change Password</a>
+                    </th:block>
+                </th:block>
+
+                <form th:action="@{/logout}" method="post" class="logout-form">
+                    <button type="submit" class="dropdown-item">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section class="hero-section fade-up">
+        <div class="container">
+            <h1>About Us</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li><a href="#">HOME</a></li>
+                    <li>/</li>
+                    <li><a href="#">ABOUT US</a></li>
+                    <li>/</li>
+                    <li><a href="#">ACCOUNT</a></li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <section class="trust-us-section section-padding fade-up">
+        <div class="container grid-2">
+            <div class="trust-us-images">
+                <img th:src="@{/images/8.png}" alt="Senior doctor with patient" class="img-fluid img-1" />
+                <img th:src="@{/images/10.png}" alt="Smiling doctor" class="img-fluid img-2" />
+            </div>
+            <div class="trust-us-content">
+                <span class="section-tag">About Us</span>
+                <h2>Why You Should Trust Us? Get Know About Us!</h2>
+                <p>
+                    We are a dedicated team of health professionals, psychologists, and developers passionate about helping people quit smoking.
+                    With real-world experience and science-backed methods, we offer solutions that are safe, effective, and tailored to your needs.
+                </p>
+                <p>We’re not just providing tools — we’re walking with you on your journey to a smoke-free life.</p>
+                <ul class="features-list">
+                    <li><i class="far fa-check-circle"></i> Quality health care</li>
+                    <li><i class="far fa-check-circle"></i> Only Qualified Coachs</li>
+                    <li><i class="far fa-check-circle"></i> Medical Research Professionals</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="choose-us-section section-padding fade-up">
+        <div class="container">
+            <div class="grid-2">
+                <div class="choose-us-content">
+                    <span class="section-tag-light">Features</span>
+                    <h2>Why Choose Us</h2>
+                    <p>
+                        Because we understand that quitting smoking takes more than just willpower — it requires a clear plan and timely support.
+                        Our platform helps you track your progress, receive daily motivation, and access expert guidance personalized to your journey.
+                    </p>
+                    <p>No ads, no judgment — just real support and proven success from hundreds of users who’ve made it.</p>
+                    <div class="features-grid">
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-user-md"></i></div>
+                            <p>Experience<br />Coachs</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-check-circle"></i></div>
+                            <p>Quality<br />Services</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-comments"></i></div>
+                            <p>Positive<br />Consultation</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-headphones"></i></div>
+                            <p>24 Hours<br />Support</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="choose-us-image">
+                    <img th:src="@{/images/9.png}" alt="Doctor consulting patient" class="img-fluid" />
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="main-footer">
+    <div class="container">
+        <div class="footer-address">
+            <p class="footer-heading"><strong>Address</strong></p>
+            <p>Thu Duc, Hcm</p>
+            <div class="social-icons">
+                <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/24/facebook--v1.png" alt="Facebook" /></a>
+                <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/24/github.png" alt="GitHub" /></a>
+                <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/24/whatsapp.png" alt="WhatsApp" /></a>
+            </div>
+        </div>
+        <p class="copyright">&copy; 2025 SmokeLite. All Rights Reserved.</p>
+    </div>
+</footer>
+
+<a href="#" class="back-to-top"><i class="fas fa-arrow-up"></i></a>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const faders = document.querySelectorAll('.fade-up');
+
+        const appearOptions = {
+            threshold: 0,
+            rootMargin: "0px 0px -100px 0px"
+        };
+
+        const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    return;
+                } else {
+                    entry.target.classList.add('visible');
+                    appearOnScroll.unobserve(entry.target);
+                }
+            });
+        }, appearOptions);
+
+        faders.forEach(fader => {
+            appearOnScroll.observe(fader);
+        });
+    });
+</script>
+
+</body>
+</html>

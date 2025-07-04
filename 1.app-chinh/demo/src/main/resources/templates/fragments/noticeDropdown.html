@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Notice Dropdown</title>
+
+    <!-- Font Awesome (icon chuông) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+    <style>
+        .dropdown-notice {
+            position: relative;
+        }
+
+        .dropdown-toggle-notice {
+            background: none;
+            border: none;
+            color: #495057;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+        }
+
+        .dropdown-toggle-notice i {
+            font-size: 1.2rem;
+        }
+
+        .notice-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background-color: #ff6b6b;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px #fff;
+        }
+
+        .dropdown-menu-notice {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            min-width: 280px;
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-menu-notice.show {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .dropdown-item-notice {
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+        }
+
+        .dropdown-item-notice:hover {
+            background-color: #f9f9f9;
+        }
+
+        .newest-notice {
+            background-color: #e8f0fe;
+            border-left: 4px solid #007bff;
+            font-weight: bold;
+        }
+
+        .notice-time {
+            font-size: 0.75rem;
+            color: #999;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .view-all-link {
+            text-align: center;
+            border-top: 1px solid #ddd;
+        }
+
+        .view-all-link a {
+            display: block;
+            padding: 8px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .view-all-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div th:fragment="noticeDropdown">
+    <div class="nav-item dropdown-notice">
+        <button class="dropdown-toggle-notice" onclick="toggleNoticeDropdown(this)">
+            <i class="fas fa-bell"></i>
+            <span class="notice-badge"
+                  th:if="${notifications != null and !notifications.isEmpty()}"
+                  th:text="${notifications.size()}">3</span>
+        </button>
+        <div class="dropdown-menu-notice" id="noticeDropdown">
+            <div th:if="${notifications != null and !notifications.isEmpty()}"
+                 th:each="noti, iterStat : ${notifications}"
+                 th:class="'dropdown-item-notice' + (iterStat.index == 0 ? ' newest-notice' : '')">
+                <p th:text="${noti.content}" style="margin: 0;"></p>
+                <small class="notice-time"
+                       th:text="${#temporals.format(noti.createdAt, 'dd/MM/yyyy HH:mm')}"></small>
+            </div>
+
+            <div th:if="${notifications == null or notifications.isEmpty()}"
+                 class="dropdown-item-notice" style="text-align:center; color:#888;">
+                <p style="margin: 0;">No notifications.</p>
+            </div>
+
+            <div class="dropdown-item-notice view-all-link">
+                <a th:href="@{/notice}">View all</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleNoticeDropdown(button) {
+        const dropdown = button.nextElementSibling;
+        dropdown.classList.toggle("show");
+    }
+
+    window.onclick = function (event) {
+        const isToggle = event.target.closest('.dropdown-toggle-notice');
+        if (!isToggle) {
+            document.querySelectorAll('.dropdown-menu-notice').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+    };
+</script>
+
+</body>
+</html>

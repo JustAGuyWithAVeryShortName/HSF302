@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messenger | Cải tiến bởi Gemini</title>
+    <link rel="stylesheet" th:href="@{/css/messenger.css}">
+    <style>
+        /* --- NEW CSS FOR THE 3-DOT DROPDOWN --- */
+        .dropdown-container {
+            position: relative;
+            display: inline-block; /* Allows the container to wrap its content */
+            margin-left: auto; /* Pushes the icon to the right within chat-header-actions */
+        }
+
+        .vertical-dots-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px; /* Add some padding around the icon for a larger clickable area */
+            border-radius: 5px; /* Slightly rounded corners for the clickable area */
+            transition: background-color 0.2s ease; /* Smooth transition for hover effect */
+        }
+
+        .vertical-dots-icon:hover {
+            background-color: #e0e0e0; /* Background color on hover */
+        }
+
+        .dot {
+            width: 5px; /* Adjust dot size as needed */
+            height: 5px; /* Adjust dot size as needed */
+            background-color: #666; /* Color of the dots */
+            border-radius: 50%; /* Makes them circular */
+            margin: 2px 0; /* Space between dots */
+            transition: background-color 0.2s ease; /* Smooth transition for dot color */
+        }
+
+        .vertical-dots-icon:hover .dot {
+            background-color: #333; /* Darken dots on hover */
+        }
+
+        /* NEW WRAPPER FOR DROPDOWN AND INFO TABLES */
+        .dropdown-content-wrapper {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 100%; /* Position below the icon */
+            right: 0; /* Align to the right of the icon */
+            margin-top: 5px; /* Small gap between icon and menu */
+            /* Use flexbox to arrange menu and table side-by-side */
+            display: flex;
+            flex-direction: row; /* Arrange horizontally */
+            gap: 15px; /* Space between dropdown menu and info table */
+            z-index: 1000; /* Ensure it's on top of other content */
+
+            opacity: 0; /* For fade-in animation */
+            transform: translateY(-10px); /* For slide-up animation */
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Class to show the dropdown menu and info table */
+        .dropdown-content-wrapper.show {
+            display: flex; /* Show the flex container */
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu {
+            /* No longer needs position: absolute, as it's a flex item */
+            background-color: #ffffff;
+            min-width: 180px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            padding: 8px 0;
+            flex-shrink: 0; /* Prevent the menu from shrinking */
+        }
+
+        .dropdown-menu a {
+            color: #333;
+            padding: 10px 20px;
+            text-decoration: none;
+            display: block;
+            white-space: nowrap; /* Prevent menu items from wrapping */
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #f1f1f1;
+            color: #007bff; /* Highlight text on hover */
+        }
+
+        /* Contextual Info Tables */
+        .info-table {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            /* Increased min-width to accommodate content */
+            min-width: 600px; /* Slightly wider */
+            max-width: 900px; /* Increased max-width significantly to allow content to fit */
+            display: none; /* Hidden by default, JavaScript will show individually */
+            font-size: 0.9em;
+            flex-shrink: 0; /* Prevent table from shrinking */
+            align-self: flex-start; /* Align table to the top of the flex container */
+            animation: fadeIn 0.2s ease-out; /* Keep animation for individual table show */
+        }
+
+        .info-table.show {
+            display: block; /* Show individual table */
+        }
+
+        .info-table h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.1em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .info-table table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            /* We'll use grid for flexible column sizing */
+            /* table-layout: fixed; */ /* Removed as grid handles layout */
+        }
+
+        /* Make each table row a grid container */
+        .info-table table tr {
+            display: grid;
+            /* Auto-size the first column (label), 1fr for the second (content) */
+            /* This ensures content takes all available space and wraps */
+            grid-template-columns: auto 1fr;
+            gap: 5px; /* Small gap between columns */
+        }
+
+        .info-table td {
+            padding: 6px 0;
+            vertical-align: top;
+            word-wrap: break-word; /* Allows long words to break and wrap */
+            word-break: break-word; /* Ensures very long strings break */
+        }
+
+        .info-table td:first-child {
+            font-weight: bold;
+            color: #555;
+            text-align: right; /* Align labels to the right */
+            padding-right: 10px; /* Add padding to separate label from content */
+            white-space: nowrap; /* Prevent label from wrapping if possible */
+        }
+
+        /* The second cell will naturally take the remaining space due to 1fr */
+        .info-table td:nth-child(2) {
+            /* No specific width needed here, grid handles it */
+            white-space: pre-wrap;
+        }
+
+        .info-table .action-link {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid #eee;
+            color: #007bff; /* Match your link color */
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .info-table .action-link:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* --- END NEW CSS --- */
+        /* Conversation List Container */
+        .conversation-list {
+            background-color: #f9f9f9; /* Slightly off-white background for the list */
+            border-right: 1px solid #e0e0e0; /* Subtle right border */
+            padding: 10px 0; /* Vertical padding */
+            overflow-y: auto; /* Allow scrolling if many conversations */
+            height: calc(100% - 120px); /* Adjust based on your header/toolbar height */
+        }
+
+        /* Individual Conversation Item */
+        .conversation-item {
+            display: flex; /* Use flexbox for alignment */
+            align-items: center; /* Vertically center items */
+            padding: 12px 15px; /* Generous padding for distinctness */
+            margin-bottom: 5px; /* Space between items */
+            cursor: pointer; /* Indicate clickable */
+            transition: background-color 0.2s ease, border-left 0.2s ease, box-shadow 0.2s ease;
+            border-left: 5px solid transparent; /* Placeholder for active state border */
+            position: relative; /* For the active state indicator */
+            color: #333;
+        }
+
+        .conversation-item:hover {
+            background-color: #f0f0f0; /* Light gray on hover */
+        }
+
+        /* Active Conversation Item */
+        .conversation-item.active {
+            background-color: #e6f2ff; /* Light blue background for active item */
+            border-left-color: #007bff; /* Blue accent border on the left */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for active item */
+            font-weight: bold; /* Make text bolder when active */
+             /* Ensure good contrast */
+            color: #212529;
+        }
+
+        /* Avatar Container */
+        .avatar-container {
+            position: relative;
+            margin-right: 15px; /* Space between avatar and details */
+        }
+
+        .avatar {
+            width: 50px; /* Larger avatar for more presence */
+            height: 50px;
+            border-radius: 50%; /* Circular avatar */
+            object-fit: cover; /* Ensure image covers the area */
+            border: 2px solid #ccc; /* Subtle border around avatar */
+        }
+
+        .status-dot {
+            position: absolute;
+            bottom: 0px; /* Adjust as needed */
+            right: 0px; /* Adjust as needed */
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ccc; /* Default offline color */
+            border: 2px solid #f9f9f9; /* Border to stand out on darker backgrounds */
+        }
+
+        .status-dot.online {
+            background-color: #28a745; /* Green for online */
+        }
+
+        /* Conversation Details */
+        .conversation-details {
+            flex-grow: 1; /* Allows details to take up remaining space */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Hide overflowing text */
+        }
+
+        .conversation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px; /* Space between header and footer */
+        }
+
+        .user-username {
+            font-size: 1.1em; /* Slightly larger username */
+            margin: 0;
+            color: #333; /* Darker color for username */
+            white-space: nowrap; /* Prevent wrapping */
+            overflow: hidden; /* Hide overflow */
+            text-overflow: ellipsis; /* Add ellipsis for long names */
+
+        }
+
+        .time {
+            font-size: 0.85em; /* Smaller font for time */
+            color: #888; /* Lighter color for time */
+            margin-left: 10px; /* Space from username */
+            white-space: nowrap;
+        }
+
+        .no-message-label {
+            font-size: 0.85em;
+            color: #aaa; /* Even lighter for "N/A" */
+            font-style: italic;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+
+        .conversation-footer {
+            font-size: 0.9em;
+            color: #666; /* Medium gray for last message */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* Add ellipsis for long messages */
+        }
+
+        .last-message {
+            margin: 0;
+            color: #666;
+        }
+
+        /* If you need more general sidebar styling to support this */
+        .sidebar {
+            width: 300px; /* Or adjust as needed */
+            background-color: #fff;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Space out elements */
+        }
+
+        .sidebar-toolbar {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        .dropdown {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .dropdown svg {
+            margin-left: 5px;
+            color: #888;
+        }
+
+        /* Ensure your Exit and Logout buttons look good with this design */
+        .button-link, .logout-button {
+            padding: 8px 12px;
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9em; /* Slightly smaller for buttons in header */
+            text-align: center;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .button-link:hover, .logout-button:hover {
+            background-color: #e0e0e0;
+            border-color: #bbb;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-app">
+
+    <aside class="sidebar">
+        <header class="sidebar-header">
+            <a id="exitButton" th:if="${currentUserRoleString != 'Coach'}" th:href="@{/dashboard}" class="button-link">
+                Exit
+            </a>
+
+            <form th:action="@{/spring-security-logout}" method="post"
+                  th:if="${currentUserRoleString == 'Coach'}"
+                  style="display: inline-block; margin-left: 10px;">
+                <button type="submit" class="logout-button">Coach Logout</button>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            </form>
+        </header>
+
+        <div class="sidebar-toolbar">
+            <div class="dropdown">
+                <span>Tất cả tin nhắn</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+        </div>
+
+        <div class="conversation-list" id="connectedUsers" role="list">
+            <div th:each="conv : ${conversations}"
+                 class="conversation-item"
+                 th:classappend="${conv.isActive} ? 'active' : ''"
+                 th:attr="data-conversation-id=${conv.id}"
+                 th:id="${conv.partner.username}" role="listitem">
+                <div class="avatar-container">
+                    <img src="https://png.pngtree.com/png-clipart/20240603/original/pngtree-cat-logo-design-png-image_15240244.png" alt="User Avatar" class="avatar">
+                    <span class="status-dot" th:classappend="${conv.partner.status.name() == 'ONLINE'} ? 'online' : ''"></span>
+                </div>
+                <div class="conversation-details">
+                    <div class="conversation-header">
+                        <h3 class="user-username" th:text="${(conv.partner.firstName != null and conv.partner.lastName != null) ? (conv.partner.firstName + ' ' + conv.partner.lastName) : (conv.partner.firstName != null ? conv.partner.firstName : (conv.partner.lastName != null ? conv.partner.lastName : conv.partner.username))}">Username</h3>
+                        <span th:if="${conv.lastMessage != null and conv.lastMessage != ''}" th:text="${conv.time}" class="time">9:30pm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="chat-area">
+        <header class="chat-header" th:if="${activeConversationPartner}" th:object="${activeConversationPartner}">
+            <div class="avatar-container">
+                <span class="status-dot" th:classappend="*{status.name() == 'ONLINE'} ? 'online' : ''"></span>
+            </div>
+            <div class="chat-header-info">
+                <h2 id="connected-user-fullname"></h2>
+                <span class="user-status" th:text="*{status.name() == 'ONLINE'} ? 'Online' : 'Offline'">Online</span>
+            </div>
+            <div class="chat-header-actions">
+                <div class="dropdown-container" th:if="${currentUserRoleString == 'Coach'}">
+                    <div class="vertical-dots-icon" id="chatOptionsIcon">
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+
+                    <div class="dropdown-content-wrapper" id="dropdownContentWrapper">
+                        <div class="dropdown-menu" id="chatOptionsDropdown">
+                            <a href="#" data-action="personal-info">Personal information</a>
+                            <a href="#" data-action="survey-answer">Survey answer</a>
+                            <a href="#" data-action="quit-plan">Quit plan</a>
+                        </div>
+
+                        <div class="info-table" id="personalInfoTable">
+                            <h4>Personal Information</h4>
+                            <table>
+                                <tr><td>Last Name:</td><td id="personalInfoLastName">N/A</td></tr>
+                                <tr><td>First Name:</td><td id="personalInfoFirstName">N/A</td></tr>
+                                <tr><td>Email:</td><td id="personalInfoEmail">N/A</td></tr>
+                            </table>
+                        </div>
+
+                        <div class="info-table" id="surveyAnswerTable">
+                            <h4>Latest Survey Summary</h4>
+                            <table>
+                                <tr><td>Survey Level:</td><td id="surveyLevel">Moderate Dependence Level</td></tr>
+                                <tr><td>Date Taken:</td><td id="surveyDateTaken">Today</td></tr>
+                            </table>
+                        </div>
+
+                        <div class="info-table" id="quitPlanTable">
+                            <h4>Quit Plan Status</h4>
+                            <table>
+                                <tr><td>Start Date:</td><td id="quitPlanStartDate">N/A</td></tr>
+                                <tr><td>Target Date:</td><td id="quitPlanTargetDate">N/A</td></tr>
+                                <tr><td>Stages:</td><td id="quitPlanStages">N/A</td></tr>
+                                <tr><td>Plans:</td><td id="quitPlanCustomPlan">N/A</td></tr>
+                                <tr><td>Daily Cigarettes:</td><td id="quitPlanDailyCigarettes">N/A</td></tr> <tr><td>Daily Spending:</td><td id="quitPlanDailySpending">N/A</td></tr>
+                                <tr><td>Reasons:</td><td id="quitPlanReasons">N/A</td></tr>
+                            </table>
+                        </div>
+
+                    </div> </div>
+            </div>
+        </header>
+
+        <div class="messages-container" id="chat-messages" role="log">
+            <th:block th:each="msg, iterStat : ${messages}">
+                <div th:if="${iterStat.first or !messages[iterStat.index-1].timestamp.toLocalDate().isEqual(msg.timestamp.toLocalDate())}"
+                     class="date-separator">
+                    <span th:text="${#temporals.format(msg.timestamp, 'EEEE, dd MMMM')}"></span>
+                </div>
+
+                <div class="message-group" th:classappend="${msg.senderId == currentUser.username ? 'sent' : 'received'}" th:attr="data-sender-id=${msg.senderId}">
+                    <div class="message-bubble">
+                        <p th:text="${msg.content}">Nội dung tin nhắn</p>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+
+        <form class="chat-input-form"  id="messageForm" th:if="${activeConversationPartner}">
+            <textarea id="message" placeholder="Enter your message..." rows="1" aria-label="Soạn tin nhắn"></textarea>
+            <div class="input-actions">
+                <button type="submit" class="icon-button send-button" aria-label="Gửi">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </form>
+    </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- DOM Element References ---
+        const messageForm = document.querySelector('#messageForm');
+        const messageInput = document.querySelector('#message');
+        const chatArea = document.querySelector('#chat-messages');
+        const exitButton = document.querySelector('#exitButton'); // Changed ID to match HTML
+
+        const chatOptionsIcon = document.getElementById('chatOptionsIcon');
+        const chatOptionsDropdown = document.getElementById('chatOptionsDropdown');
+        const dropdownContentWrapper = document.getElementById('dropdownContentWrapper');
+
+        const personalInfoTable = document.getElementById('personalInfoTable');
+        const surveyAnswerTable = document.getElementById('surveyAnswerTable');
+        const quitPlanTable = document.getElementById('quitPlanTable');
+        const infoTables = [personalInfoTable, surveyAnswerTable, quitPlanTable];
+
+        const personalInfoLastName = document.getElementById('personalInfoLastName');
+        const personalInfoFirstName = document.getElementById('personalInfoFirstName');
+        const personalInfoEmail = document.getElementById('personalInfoEmail');
+
+        const surveyLevelCell = document.getElementById('surveyLevel');
+        const surveyDateTakenCell = document.getElementById('surveyDateTaken');
+
+        // Add references for Quit Plan cells
+        const quitPlanStartDate = document.getElementById('quitPlanStartDate');
+        const quitPlanTargetDate = document.getElementById('quitPlanTargetDate');
+        const quitPlanStages = document.getElementById('quitPlanStages');
+        const quitPlanMethod = document.getElementById('quitPlanMethod');
+        const quitPlanCustomPlan = document.getElementById('quitPlanCustomPlan');
+        const quitPlanDailyCigarettes = document.getElementById('quitPlanDailyCigarettes');
+        const quitPlanDailySpending = document.getElementById('quitPlanDailySpending');
+        const quitPlanReasons = document.getElementById('quitPlanReasons');
+
+
+        // --- State Variables ---
+        let selectedUserId = null;
+        let stompClient = null;
+        const username = '[[${username}]]';
+        // We still need currentUserRole for the dropdown options visibility (if applicable),
+        // but the chat partner name display now depends on the selected user's role.
+        const currentUserRole = '[[${currentUserRoleString}]]';
+        const notificationState = {};
+        let lastMessageDate = null;
+
+        // --- Robust Fetch Helper ---
+        async function fetchAndParse(url, options) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`Network response was not ok for URL: ${url}`);
+                    console.error(`Status: ${response.status} ${response.statusText}`);
+                    console.error('Server response body:', errorText);
+                    throw new Error(`Server returned status ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Failed to fetch or parse from URL: ${url}`, error);
+                throw error;
+            }
+        }
+
+
+        function connect(event) {
+            if (event) event.preventDefault();
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, onConnected, onError);
+        }
+
+        function onError(error) {
+            console.error('STOMP Error:', error);
+        }
+
+        function onConnected() {
+            stompClient.subscribe(`/user/${username}/queue/messages`, onMessageReceived);
+            stompClient.subscribe(`/user/public`, onMessageReceived);
+            stompClient.send("/app/user.addUser", {}, JSON.stringify({ senderId: username, status: 'ONLINE' }));
+            findAndDisplayConnectedUsers();
+        }
+
+        async function findAndDisplayConnectedUsers() {
+            try {
+                const connectedUsers = await fetchAndParse('/users');
+                const connectedUsersList = document.getElementById('connectedUsers');
+                if (!connectedUsersList) return;
+
+                const existingUserElements = new Map(Array.from(connectedUsersList.children).map(el => [el.id, el]));
+                const activeUsernames = new Set();
+
+                connectedUsers.filter(user => user.username !== username).forEach(user => {
+                    const userId = user.username;
+                    activeUsernames.add(userId);
+                    let userElement = existingUserElements.get(userId);
+
+                    if (userElement) {
+                        userElement.querySelector('.status-dot').classList.toggle('online', user.status?.toUpperCase() === 'ONLINE');
+                    } else {
+                        userElement = appendUserElement(user, connectedUsersList);
+                    }
+                    existingUserElements.delete(userId);
+                });
+
+                existingUserElements.forEach(element => connectedUsersList.removeChild(element));
+                document.querySelectorAll('.conversation-item').forEach(item => {
+                    item.removeEventListener('click', userItemClick);
+                    item.addEventListener('click', userItemClick);
+                });
+
+                setupChatOptions();
+            } catch (error) {
+                console.error('Could not display connected users.', error);
+            }
+        }
+
+        function setupChatOptions() {
+            if (chatOptionsIcon && chatOptionsDropdown && dropdownContentWrapper) {
+                function hideAllInfoTables() {
+                    infoTables.forEach(table => table.classList.remove('show'));
+                }
+
+                chatOptionsIcon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdownContentWrapper.classList.toggle('show');
+                    hideAllInfoTables();
+                });
+
+                chatOptionsDropdown.querySelectorAll('a').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const action = item.dataset.action;
+                        hideAllInfoTables();
+
+                        let tableToShow;
+                        if (action === 'personal-info') {
+                            tableToShow = personalInfoTable;
+                            fetchAndPopulatePersonalInfo(selectedUserId);
+                        } else if (action === 'survey-answer') {
+                            tableToShow = surveyAnswerTable;
+                            fetchAndPopulateSurveyAnswer(selectedUserId);
+                        } else if (action === 'quit-plan') {
+                            tableToShow = quitPlanTable;
+                            fetchAndPopulateQuitPlan(selectedUserId);
+                        }
+
+                        if (tableToShow) tableToShow.classList.add('show');
+                    });
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!chatOptionsIcon.contains(e.target) && !dropdownContentWrapper.contains(e.target)) {
+                        dropdownContentWrapper.classList.remove('show');
+                        hideAllInfoTables();
+                    }
+                });
+
+                infoTables.forEach(table => table.addEventListener('click', (e) => e.stopPropagation()));
+            }
+        }
+
+
+        function appendUserElement(user, connectedUsersList) {
+            const divItem = document.createElement('div');
+            divItem.classList.add('conversation-item');
+            divItem.id = user.username; // This ID must be unique, username is best for this
+            divItem.dataset.conversationId = user.username;
+
+            const isUserOnline = user.status?.toUpperCase() === 'ONLINE';
+            const badgeVisible = notificationState[user.username] ? 'inline-block' : 'none';
+
+            let displayFullName = '';
+            if (user.firstName && user.lastName) {
+                displayFullName = `${user.firstName} ${user.lastName}`;
+            } else if (user.firstName) {
+                displayFullName = user.firstName;
+            } else if (user.lastName) {
+                displayFullName = user.lastName;
+            } else {
+                displayFullName = user.username; // Fallback to username if no name parts
+            }
+
+            divItem.innerHTML = `
+            <div class="avatar-container">
+                <img src="https://png.pngtree.com/png-clipart/20240603/original/pngtree-cat-logo-design-png-image_15240244.png" alt="User Avatar" class="avatar">
+                <span class="status-dot ${isUserOnline ? 'online' : ''}"></span>
+            </div>
+            <div class="conversation-details">
+                <div class="conversation-header">
+                    <h3 class="user-username">${displayFullName}</h3> <span class="time">N/A</span> </div>
+                <div class="conversation-footer">
+                    <span class="badge bg-danger ms-auto" id="notify-${user.username}" style="display: ${badgeVisible};">New</span>
+                    </div>
+            </div>`;
+            connectedUsersList.appendChild(divItem);
+            return divItem;
+        }
+
+        async function userItemClick(event) {
+            document.querySelectorAll('.conversation-item').forEach(item => item.classList.remove('active'));
+            const clickedUserElement = event.currentTarget;
+            clickedUserElement.classList.add('active');
+            document.getElementById('messageForm')?.style.setProperty('display', 'flex', 'important');
+
+            selectedUserId = clickedUserElement.dataset.conversationId;
+            const connectedUserFullnameElement = document.querySelector('#connected-user-fullname');
+
+            if (connectedUserFullnameElement) {
+                try {
+                    // Fetch the profile of the selected user
+                    const userProfile = await fetchAndParse(`/api/users/${selectedUserId}/profile`);
+
+                    let displayName = '';
+                    if (userProfile.firstName && userProfile.lastName) {
+                        displayName = `${userProfile.firstName} ${userProfile.lastName}`;
+                    } else if (userProfile.firstName) {
+                        displayName = userProfile.firstName;
+                    } else if (userProfile.lastName) {
+                        displayName = userProfile.lastName;
+                    } else {
+                        // Fallback to username if no first/last name is available
+                        displayName = userProfile.username || selectedUserId || 'N/A';
+                    }
+
+                    // *** Apply prefix if the SELECTED USER (chat partner) is a Coach ***
+                    if (userProfile.role === 'Coach') { // Assuming userProfile contains the role of the selected user, e.g., 'Coach'
+                        connectedUserFullnameElement.textContent = `(Coach) ${displayName}`;
+                    } else {
+                        connectedUserFullnameElement.textContent = displayName;
+                    }
+
+                } catch (error) {
+                    console.error(`Error fetching user profile for ${selectedUserId}:`, error);
+                    // Fallback to username from the conversation item if profile fetch fails
+                    connectedUserFullnameElement.textContent = clickedUserElement.querySelector('.user-username')?.textContent || 'N/A';
+                }
+            }
+
+            const notificationBadge = document.getElementById(`notify-${selectedUserId}`);
+            if (notificationBadge) notificationBadge.style.display = 'none';
+            delete notificationState[selectedUserId];
+
+            fetchAndDisplayUserChat();
+            openChat();
+        }
+
+        async function fetchAndDisplayUserChat() {
+            try {
+                const userChat = await fetchAndParse(`/messages/${username}/${selectedUserId}`);
+                if (chatArea) {
+                    chatArea.innerHTML = '';
+                    lastMessageDate = null; // Reset last message date for new chat
+                    userChat.forEach(chat => displayMessage(chat.senderId, chat.content, chat.timestamp));
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                }
+            } catch (error) {
+                console.error(`Could not fetch chat for user ${selectedUserId}.`, error);
+                if(chatArea) chatArea.innerHTML = '<p class="error-message">Could not load chat history.</p>';
+            }
+        }
+
+        async function fetchAndPopulatePersonalInfo(userId) {
+            if (!userId) return;
+            try {
+                const userProfile = await fetchAndParse(`/api/users/${userId}/profile`);
+                if (personalInfoLastName) personalInfoLastName.textContent = userProfile.lastName || 'N/A';
+                if (personalInfoFirstName) personalInfoFirstName.textContent = userProfile.firstName || 'N/A';
+                if (personalInfoEmail) personalInfoEmail.textContent = userProfile.email || 'N/A';
+            } catch (error) {
+                console.error(`Error fetching personal info for user ${userId}:`, error);
+                if (personalInfoLastName) personalInfoLastName.textContent = 'Error';
+                if (personalInfoFirstName) personalInfoFirstName.textContent = 'Error';
+                if (personalInfoEmail) personalInfoEmail.textContent = 'Error';
+            }
+        }
+
+        async function fetchAndPopulateSurveyAnswer(userId) {
+            if (!userId) return;
+            try {
+                const surveyData = await fetchAndParse(`/api/users/${userId}/latest-survey-answer`);
+                if (surveyLevelCell) surveyLevelCell.textContent = surveyData.analysis || 'N/A';
+                if (surveyDateTakenCell) {
+                    surveyDateTakenCell.textContent = surveyData.createdAt ?
+                        new Date(surveyData.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) :
+                        'N/A';
+                }
+            } catch (error) {
+                console.error(`Error fetching survey answer for user ${userId}:`, error);
+                if (surveyLevelCell) surveyLevelCell.textContent = 'N/A';
+                if (surveyDateTakenCell) surveyDateTakenCell.textContent = 'N/A';
+            }
+        }
+
+        async function fetchAndPopulateQuitPlan(userId) {
+            if (!userId) return;
+            try {
+                const quitPlanData = await fetchAndParse(`/api/users/${userId}/latest-quit-plan`);
+
+                if (quitPlanStartDate) {
+                    quitPlanStartDate.textContent = quitPlanData.startDate ?
+                        new Date(quitPlanData.startDate).toLocaleDateString('en-GB') : // DD/MM/YYYY format
+                        'N/A';
+                }
+                if (quitPlanTargetDate) {
+                    quitPlanTargetDate.textContent = quitPlanData.targetDate ?
+                        new Date(quitPlanData.targetDate).toLocaleDateString('en-GB') : // DD/MM/YYYY format
+                        'N/A';
+                }
+                if (quitPlanStages) quitPlanStages.textContent = quitPlanData.stages || 'N/A';
+                if (quitPlanMethod) quitPlanMethod.textContent = quitPlanData.method || 'N/A';
+                if (quitPlanCustomPlan) quitPlanCustomPlan.textContent = quitPlanData.customPlan || 'N/A';
+                if (quitPlanDailyCigarettes) quitPlanDailyCigarettes.textContent = quitPlanData.dailySmokingCigarettes != null ? quitPlanData.dailySmokingCigarettes : 'N/A';
+                if (quitPlanDailySpending) quitPlanDailySpending.textContent = quitPlanData.dailySpending != null ? quitPlanData.dailySpending : 'N/A';
+                if (quitPlanReasons) quitPlanReasons.textContent = quitPlanData.reasons && quitPlanData.reasons.length > 0 ? quitPlanData.reasons.join(', ') : 'N/A';
+            } catch (error) {
+                console.error(`Error fetching quit plan for user ${userId}:`, error);
+                if (quitPlanStartDate) quitPlanStartDate.textContent = 'N/A';
+                if (quitPlanTargetDate) quitPlanTargetDate.textContent = 'N/A';
+                if (quitPlanStages) quitPlanStages.textContent = 'N/A';
+                if (quitPlanMethod) quitPlanMethod.textContent = 'N/A';
+                if (quitPlanCustomPlan) quitPlanCustomPlan.textContent = 'N/A';
+                if (quitPlanDailyCigarettes) quitPlanDailyCigarettes.textContent = 'N/A';
+                if (quitPlanDailySpending) quitPlanDailySpending.textContent = 'N/A';
+                if (quitPlanReasons) quitPlanReasons.textContent = 'N/A';
+            }
+        }
+
+        function onMessageReceived(payload) {
+            try {
+                const message = JSON.parse(payload.body);
+
+                if (message.type === 'STATUS_UPDATE') {
+                    findAndDisplayConnectedUsers();
+                    return;
+                }
+
+                if (selectedUserId && selectedUserId === message.senderId) {
+                    displayMessage(message.senderId, message.content, message.timestamp);
+                } else {
+                    notificationState[message.senderId] = true;
+                    const notificationBadge = document.getElementById(`notify-${message.senderId}`);
+                    if (notificationBadge) notificationBadge.style.display = 'inline-block';
+
+                    const userElement = document.getElementById(message.senderId);
+                    if (userElement) {
+                        userElement.querySelector('.last-message').textContent = message.content;
+                        if (message.timestamp) {
+                            const msgDate = new Date(message.timestamp);
+                            userElement.querySelector('.time').textContent = `${msgDate.getHours().toString().padStart(2, '0')}:${msgDate.getMinutes().toString().padStart(2, '0')}`;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to parse incoming WebSocket message:", error);
+                console.error("Raw non-JSON message body received:", payload.body);
+            }
+        }
+
+        function displayMessage(senderId, content, timestampString) {
+            if (!chatArea) return;
+            const messageDate = new Date(timestampString);
+            if (!lastMessageDate || messageDate.toDateString() !== lastMessageDate.toDateString()) {
+                const today = new Date();
+                const yesterday = new Date();
+                yesterday.setDate(today.getDate() - 1);
+                let dateSeparatorText = '';
+
+                if (messageDate.toDateString() === today.toDateString()) dateSeparatorText = 'Today';
+                else if (messageDate.toDateString() === yesterday.toDateString()) dateSeparatorText = 'Yesterday';
+                else {
+                    dateSeparatorText = messageDate.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                    dateSeparatorText = dateSeparatorText.charAt(0).toUpperCase() + dateSeparatorText.slice(1);
+                }
+                chatArea.insertAdjacentHTML('beforeend', `<div class="date-separator"><span>${dateSeparatorText}</span></div>`);
+                lastMessageDate = messageDate;
+            }
+
+            const messageGroupClass = senderId === username ? 'sent' : 'received';
+            const messageGroup = `
+            <div class="message-group ${messageGroupClass}" data-sender-id="${senderId}">
+                <div class="message-bubble"><p>${content}</p></div>
+            </div>`;
+            chatArea.insertAdjacentHTML('beforeend', messageGroup);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function sendMessage(event) {
+            event.preventDefault();
+            const messageContent = messageInput.value.trim();
+            if (messageContent && stompClient && selectedUserId) {
+                const chatMessage = { senderId: username, receiverId: selectedUserId, content: messageContent, timestamp: new Date() };
+                stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
+                displayMessage(username, messageContent, new Date().toISOString());
+                messageInput.value = '';
+                messageInput.style.height = 'auto'; // Reset height after sending
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+        }
+
+        // Function for general logout
+        function performLogout() {
+            if (stompClient) {
+                stompClient.send("/app/user.disconnectUser", {}, JSON.stringify({ senderId: username, status: 'OFFLINE' }));
+            }
+            // This URL triggers Spring Security's logout filter
+            window.location.href = '/spring-security-logout';
+        }
+
+        // --- Event Listeners and Initializers ---
+        if (messageForm) messageForm.addEventListener('submit', sendMessage);
+
+        // Event listener for the "Exit" button
+        if (exitButton) {
+            exitButton.addEventListener('click', function() {
+                // Assuming "Exit" means a general logout for all users
+                performLogout();
+            });
+        }
+
+        // Event listener for the "Coach Logout" button (only visible for Coach role
+
+        const textarea = document.querySelector('.chat-input-form textarea');
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight + 2) + 'px';
+            });
+        }
+
+        const chatApp = document.querySelector('.chat-app');
+        const backButton = document.querySelector('.back-button'); // This button might not be in your provided HTML
+        const openChat = () => chatApp?.classList.add('show-chat-area');
+        const closeChat = () => chatApp?.classList.remove('show-chat-area');
+        if (backButton) backButton.addEventListener('click', closeChat);
+
+        connect();
+    });
+</script>
+</body>
+</html>

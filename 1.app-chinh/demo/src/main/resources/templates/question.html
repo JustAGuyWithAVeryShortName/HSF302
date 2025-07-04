@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smoking Survey</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* 2. CSS VARIABLE SYSTEM (DESIGN TOKENS) */
+        :root {
+            --primary: #3B82F6;
+            --primary-hover: #2563EB;
+            --background: #F9FAFB;
+            --card-bg: #FFFFFF;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --border-color: #E5E7EB;
+            --radius-md: 0.8rem;
+            --radius-lg: 1.2rem;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.1);
+            --font-main: 'Inter', sans-serif;
+            --transition-speed: 0.3s;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--background);
+            padding: 2.5rem 2rem;
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 2.5rem 3rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            transition: box-shadow var(--transition-speed) ease, transform var(--transition-speed) ease;
+        }
+
+        /* 3. ENHANCED TITLE */
+        .survey-title {
+            text-align: center;
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 2.5rem;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+        .survey-title span {
+            color: var(--primary);
+        }
+
+        .question {
+            margin-bottom: 2.5rem;
+            padding-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        /* Remove border from the last question for a cleaner look */
+        .question:last-of-type {
+            border-bottom: none;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+        }
+
+        /* 4. MAJOR UX IMPROVEMENT: "BUTTON-LIKE" OPTIONS */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem; /* Space between options */
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+        }
+
+        /* Hover effect */
+        .option-label:hover {
+            border-color: var(--primary);
+            background-color: #f0f5fe; /* A light, pleasant background */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Hide the original radio button */
+        .option-label input[type="radio"] {
+            display: none;
+        }
+
+        /* Create a custom pseudo-radio button for styling */
+        .option-label .custom-radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            margin-right: 1rem;
+            display: grid;
+            place-content: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .option-label .custom-radio::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            transform: scale(0);
+            transition: transform 0.15s ease-in-out;
+        }
+
+        /* Style for the checked state */
+        .option-label input[type="radio"]:checked + .custom-radio {
+            border-color: var(--primary);
+        }
+
+        .option-label input[type="radio"]:checked + .custom-radio::before {
+            transform: scale(1);
+        }
+
+        .option-label input[type="radio"]:checked ~ .option-text {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .option-text {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            transition: color var(--transition-speed) ease;
+        }
+
+        /* 5. ENHANCED SUBMIT BUTTON */
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem 1.5rem;
+            margin-top: 2rem;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .submit-btn:hover,
+        .submit-btn:focus-visible {
+            background: var(--primary-hover);
+            outline: none;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.5);
+        }
+
+        /* 6. RESPONSIVE DESIGN */
+        @media (max-width: 640px) {
+            body {
+                padding: 1.5rem 1rem;
+            }
+            .container {
+                padding: 2rem 1.5rem;
+            }
+            .survey-title {
+                font-size: 1.8rem;
+            }
+            .question-text {
+                font-size: 1.1rem;
+            }
+            .option-label {
+                padding: 0.8rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="survey-title">Smoking Habits <span>Survey</span></h1>
+    <form th:action="@{/questionnaire}" method="post">
+
+        <div th:each="q, iterStat : ${questions}" class="question">
+            <p class="question-text" th:text="|Question ${iterStat.index + 1}: ${q.questionText}|"></p>
+
+            <div class="options-container">
+                <div th:each="option : ${q.options}">
+                    <label class="option-label">
+                        <input type="radio" th:name="${'answer' + q.id}" th:value="${option.id}" required />
+                        <span class="custom-radio"></span>
+                        <span class="option-text" th:text="${option.getOptionText()}"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Complete Survey</button>
+    </form>
+</div>
+</body>
+</html>

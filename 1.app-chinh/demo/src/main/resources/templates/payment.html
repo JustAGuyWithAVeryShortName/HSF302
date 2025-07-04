@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán Gói Hội Viên</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --text-color: #333;
+            --light-gray-color: #f1f3f5;
+            --white-color: #fff;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: var(--light-gray-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        /* NEW: No-Script Styling */
+        noscript {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff8e1;
+            border: 1px solid #ffecb3;
+            border-radius: 8px;
+        }
+
+        .payment-container {
+            background: var(--white-color);
+            padding: 30px 40px;
+            border-radius: 24px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .payment-header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        .payment-header p {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* The main content that will be hidden on success/failure */
+        #payment-content {
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .qr-code-wrapper img {
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 10px;
+            max-width: 250px;
+            width: 100%;
+        }
+
+        .countdown-timer {
+            font-size: 0.9rem; color: #555;
+            margin: 15px 0 20px 0; font-weight: 500;
+        }
+        .countdown-timer strong { color: var(--error-color); }
+
+        .payment-details {
+            background-color: #f8f9fa; padding: 15px;
+            border-radius: 12px; margin-bottom: 20px; text-align: left;
+        }
+        .payment-details p {
+            margin: 10px 0; display: flex; justify-content: space-between;
+            align-items: center; font-size: 0.95rem;
+        }
+        .payment-details strong { color: var(--primary-color); }
+
+        .copy-btn {
+            background-color: #e9ecef; border: 1px solid var(--border-color);
+            color: #495057; padding: 4px 10px; border-radius: 6px;
+            font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+        }
+        .copy-btn:hover { background-color: #ced4da; }
+        .copy-btn.copied {
+            background-color: var(--success-color); color: white;
+            border-color: var(--success-color); transform: scale(1.05);
+        }
+
+        /* Status box with all states */
+        .status-box {
+            display: flex; align-items: center; justify-content: center;
+            padding: 12px 20px; border-radius: 12px; font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .status-box.waiting {
+            background-color: #fff3cd; color: #856404;
+            animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1); /* NEW: Pulse animation */
+        }
+        .status-box.success { background-color: #d4edda; color: #155724; }
+        .status-box.failed { background-color: #f8d7da; color: #721c24; }
+
+        @keyframes pulse {
+            50% { opacity: 0.7; }
+        }
+
+        .spinner {
+            border: 3px solid rgba(0,0,0,0.1); border-left-color: currentColor;
+            border-radius: 50%; width: 18px; height: 18px;
+            animation: spin 1s linear infinite; margin-right: 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* NEW: Result Icon Container (for checkmark/cross) */
+        #result-icon-container {
+            display: none; /* Hidden by default */
+            margin: 20px 0;
+        }
+        .result-icon {
+            width: 80px; height: 80px;
+            border-radius: 50%; display: inline-block;
+            position: relative;
+        }
+        .result-icon.success { background-color: var(--success-color); }
+        .result-icon.failed { background-color: var(--error-color); }
+
+        /* NEW: CSS Animated Checkmark */
+        .checkmark {
+            transform: rotate(45deg); height: 40px;
+            width: 20px; border-bottom: 7px solid white;
+            border-right: 7px solid white; position: absolute;
+            left: 27px; top: 12px; animation: checkmark-anim 0.4s ease-out forwards;
+        }
+
+        /* NEW: CSS Animated Cross */
+        .cross::before, .cross::after {
+            content: ''; position: absolute;
+            width: 7px; height: 50px; background-color: white;
+            left: 36px; top: 15px;
+        }
+        .cross::before { transform: rotate(45deg); }
+        .cross::after { transform: rotate(-45deg); }
+
+
+        .support-link { margin-top: 25px; }
+        .support-link a { color: #555; text-decoration: none; font-size: 0.9rem; }
+        .support-link a:hover { color: var(--primary-color); text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<noscript>
+    <p>Trang web này yêu cầu JavaScript để hoạt động. Vui lòng bật JavaScript trong trình duyệt của bạn và tải lại trang.</p>
+</noscript>
+
+<div class="payment-container" id="paymentContainer">
+    <div id="result-icon-container"></div>
+
+    <div id="payment-content">
+        <div class="payment-header">
+            <h1>Thanh toán Hội viên</h1>
+            <p>Quét mã QR bằng ứng dụng ngân hàng của bạn</p>
+        </div>
+        <div class="qr-code-wrapper">
+            <img th:src="'https://img.vietqr.io/image/970423-22201052005-compact2.jpg?amount=' + ${amount} + '&addInfo=' + ${plan}" alt="QR Code Thanh toán" />
+        </div>
+        <div class="countdown-timer" id="countdownTimer">
+            Mã QR sẽ hết hạn sau <strong id="countdown">15:00</strong>
+        </div>
+        <div class="payment-details">
+            <p>
+                <span>Số tiền: <strong id="amountText" th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">150,000 VNĐ</strong></span>
+                <button class="copy-btn" onclick="PaymentModule.copyToClipboard(this, 'amountText')">Sao chép</button>
+            </p>
+            <p>
+                <span>Nội dung: <strong id="planText" th:text="${plan}">GOI_NAM</strong></span>
+                <button class="copy-btn" onclick="PaymentModule.copyToClipboard(this, 'planText')">Sao chép</button>
+            </p>
+        </div>
+    </div>
+
+    <div id="statusBox" class="status-box waiting" aria-live="polite">
+        <div class="spinner" id="spinner"></div>
+        <span id="statusText">Đang chờ thanh toán...</span>
+    </div>
+    <div class="support-link">
+        <a href="/support">Gặp sự cố? Liên hệ hỗ trợ</a>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // NEW: Encapsulated the entire logic in a Module (IIFE Pattern)
+    const PaymentModule = (function () {
+
+        // --- 1. CONFIGURATION ---
+        const config = {
+            transactionId: /*[[${transactionId}]]*/ 'DEFAULT_TXN_ID',
+            successUrl: '/success',
+            timeoutMinutes: 15,
+            checkIntervalMs: 3000
+        };
+
+        // --- 2. DOM ELEMENTS ---
+        const dom = {
+            paymentContent: document.getElementById('payment-content'),
+            resultIconContainer: document.getElementById('result-icon-container'),
+            statusBox: document.getElementById('statusBox'),
+            statusText: document.getElementById('statusText'),
+            spinner: document.getElementById('spinner'),
+            countdown: document.getElementById('countdown')
+        };
+
+        // --- 3. STATE ---
+        const state = {
+            statusCheckInterval: null,
+            sessionTimeoutHandle: null,
+            countdownInterval: null
+        };
+
+        // --- 4. PRIVATE FUNCTIONS ---
+
+        const stopAllTimers = () => {
+            clearInterval(state.statusCheckInterval);
+            clearTimeout(state.sessionTimeoutHandle);
+            clearInterval(state.countdownInterval);
+        };
+
+        const startCountdown = () => {
+            let timeLeft = config.timeoutMinutes * 60;
+            state.countdownInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(state.countdownInterval);
+                    return;
+                }
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                dom.countdown.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            }, 1000);
+        };
+
+        const fetchStatus = () => {
+            fetch(`/payment/status?transactionId=${config.transactionId}&_=${new Date().getTime()}`)
+                .then(response => response.ok ? response.text() : Promise.reject('NetworkError'))
+                .then(status => {
+                    switch(status) {
+                        case 'PAID':
+                            handleFinalState('SUCCESS');
+                            break;
+                        case 'FAILED':
+                            handleFinalState('FAILED');
+                            break;
+                        // default is PENDING, we let the interval run
+                    }
+                })
+                .catch(error => console.error('Lỗi khi kiểm tra trạng thái:', error));
+        };
+
+        // NEW: Function to handle the final UI state (success, fail, expired)
+        const handleFinalState = (finalState, customMessage = '') => {
+            stopAllTimers();
+
+            dom.paymentContent.style.opacity = '0';
+            dom.paymentContent.style.transform = 'scale(0.95)';
+            dom.resultIconContainer.style.display = 'block';
+            dom.resultIconContainer.innerHTML = ''; // Clear previous icon
+
+            let iconClass, iconType, statusClass, statusMessage;
+
+            if (finalState === 'SUCCESS') {
+                iconClass = 'success';
+                iconType = 'checkmark';
+                statusClass = 'success';
+                statusMessage = customMessage || 'Thanh toán thành công! Đang chuyển hướng...';
+            } else { // FAILED or EXPIRED
+                iconClass = 'failed';
+                iconType = 'cross';
+                statusClass = 'failed';
+                statusMessage = customMessage || (finalState === 'EXPIRED' ? 'Phiên giao dịch đã hết hạn.' : 'Thanh toán thất bại.');
+            }
+
+            const iconDiv = document.createElement('div');
+            iconDiv.className = `result-icon ${iconClass}`;
+            const innerIcon = document.createElement('div');
+            innerIcon.className = iconType;
+            iconDiv.appendChild(innerIcon);
+            dom.resultIconContainer.appendChild(iconDiv);
+
+            dom.spinner.style.display = 'none';
+            dom.statusBox.className = `status-box ${statusClass}`;
+            dom.statusText.innerText = statusMessage;
+
+            if (finalState === 'SUCCESS') {
+                setTimeout(() => window.location.href = config.successUrl, 2500);
+            }
+        };
+
+        // NEW: Page Visibility API handler
+        const handleVisibilityChange = () => {
+            if (!document.hidden && state.statusCheckInterval) {
+                // User returned to the tab, check status immediately
+                fetchStatus();
+            }
+        };
+
+        // --- 5. PUBLIC FUNCTIONS ---
+        const publicMethods = {
+            init: function() {
+                // Hide noscript content if JS is enabled
+                const noscript = document.querySelector('noscript');
+                if (noscript) noscript.style.display = 'none';
+
+                startCountdown();
+                state.statusCheckInterval = setInterval(fetchStatus, config.checkIntervalMs);
+                state.sessionTimeoutHandle = setTimeout(() => handleFinalState('EXPIRED'), config.timeoutMinutes * 60 * 1000);
+
+                document.addEventListener('visibilitychange', handleVisibilityChange);
+            },
+            copyToClipboard: function(button, elementId) {
+                const textToCopy = document.getElementById(elementId).innerText;
+                if (!navigator.clipboard) {
+                    alert("Trình duyệt của bạn không hỗ trợ sao chép tự động.");
+                    return;
+                }
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalText = button.innerText;
+                    button.innerText = 'Đã chép!';
+                    button.classList.add('copied');
+                    setTimeout(() => {
+                        button.innerText = originalText;
+                        button.classList.remove('copied');
+                    }, 1500);
+                }).catch(err => console.error('Không thể sao chép: ', err));
+            }
+        };
+
+        return publicMethods;
+
+    })();
+
+    // Start the module
+    PaymentModule.init();
+
+</script>
+</body>
+</html>

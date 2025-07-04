@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmokeLite Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        /* --- 1. Cài đặt biến và Kiểu dáng tổng thể --- */
+        :root {
+            /* CẢI TIẾN: Chọn tông màu xanh hiện đại, dễ chịu hơn */
+            --primary-color: #0d6efd;
+            --primary-color-light: #e7f0ff;
+            --primary-color-hover: #0b5ed7;
+
+            --text-color: #343a40;
+            --text-color-muted: #151313;
+            --bg-color: #f8f9fa;
+            --border-color: #dee2e6;
+
+            /* CẢI TIẾN: Bóng đổ mềm mại, tinh tế hơn */
+            --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --card-shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+            --border-radius: 0.75rem; /* 12px */
+            --border-radius-sm: 0.5rem; /* 8px */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Be Vietnam Pro', sans-serif;
+            color: var(--text-color);
+            display: flex;
+            font-size: 15px; /* CẢI TIẾN: Đặt font-size cơ bản */
+        }
+
+        /* --- 2. Bố cục Sidebar --- */
+        .sidebar {
+            width: 260px;
+            background-color: #ffffff;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 1.5rem;
+            border-right: 1px solid var(--border-color); /* CẢI TIẾN: Thêm đường viền phải tinh tế */
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar .logo-container {
+            padding: 0 1rem;
+            margin-bottom: 2.5rem; /* CẢI TIẾN: Tăng khoảng cách */
+            text-align: center;
+        }
+
+        .sidebar .logo {
+            height: 120px;
+            width: auto;
+        }
+
+        .sidebar .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem; /* CẢI TIẾN: Tăng padding cho dễ click */
+            border-radius: var(--border-radius-sm);
+            color: var(--text-color-muted);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.2s, color 0.2s, transform 0.2s;
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 1rem;
+            font-size: 1.25rem;
+            width: 24px; /* CẢI TIẾN: Căn chỉnh icon thẳng hàng */
+            text-align: center;
+        }
+
+        /* CẢI TIẾN: Hiệu ứng hover rõ ràng và mượt mà hơn */
+        .sidebar .nav-link:hover {
+            background-color: var(--primary-color-light);
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .sidebar .nav-link.active {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .sidebar .nav-link.active i {
+            color: #ffffff;
+        }
+
+        .sidebar .logout-button {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: var(--border-radius-sm);
+            font-weight: 500;
+            color: #dc3545;
+            background-color: #fce8ea;
+            border: none;
+            transition: background-color 0.2s;
+            font-size: 1rem;
+        }
+        .sidebar .logout-button:hover{
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        .sidebar .logout-button i {
+            margin-right: 1rem;
+            font-size: 1.25rem;
+        }
+
+        /* --- 3. Bố cục Header và Nội dung chính --- */
+        .page-container {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CẢI TIẾN: Thêm Header tách biệt */
+        .page-header {
+            background-color: #fff;
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .main-content {
+            padding: 2rem;
+            flex-grow: 1; /* Đảm bảo content chiếm hết không gian còn lại */
+        }
+
+        /* --- 4. Cải tiến Card --- */
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: none; /* CẢI TIẾN: Bỏ shadow mặc định, chỉ hiện khi hover */
+            background-color: #fff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%; /* CẢI TIẾN: Giúp các card trên cùng một hàng cao bằng nhau */
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 1rem 1.5rem;
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+        }
+
+        .card-footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid var(--border-color);
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+        }
+
+        /* --- 5. Các thành phần UI cụ thể (Stat Cards, Buttons, Lists) --- */
+        .stat-card .card-body {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        .stat-card .icon-container {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--border-radius-sm);
+            display: grid;
+            place-items: center;
+            margin-right: 1.25rem;
+            font-size: 1.75rem;
+        }
+        .stat-card .icon-container.bg-primary-light { background-color: var(--primary-color-light); color: var(--primary-color); }
+        .stat-card .icon-container.bg-success-light { background-color: #e6f9f0; color: #198754; }
+        .stat-card .icon-container.bg-warning-light { background-color: #fff8e6; color: #ffc107; }
+        .stat-card .icon-container.bg-info-light { background-color: #e6f7ff; color: #0dcaf0; }
+
+
+        .stat-card .stat-info h4 {
+            font-size: 2rem; /* CẢI TIẾN: Số liệu to, rõ hơn */
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .stat-card .stat-info p {
+            margin: 0;
+            color: var(--text-color-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        a.stat-card-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .btn {
+            font-weight: 500;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius-sm);
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-color-hover);
+            border-color: var(--primary-color-hover);
+        }
+
+        .list-group {
+            border-radius: 0;
+        }
+        .list-group-item {
+            padding: 1rem 1.5rem;
+        }
+
+        .feedback-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem 0;
+        }
+        .feedback-item:not(:last-child) {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .feedback-item img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 1rem;
+        }
+        .feedback-item .content .user-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .feedback-item .content .rating {
+            color: #ffc107;
+            margin-bottom: 0.35rem;
+            font-size: 0.8rem; /* CẢI TIẾN: Kích thước sao nhỏ lại cho tinh tế */
+        }
+        .feedback-item .content .comment {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-color-muted);
+            line-height: 1.5;
+        }
+
+    </style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="logo-container">
+        <a th:href="@{/admin}">
+            <img th:src="@{/images/1.png}" alt="SmokeLite Logo" class="logo" />
+        </a>
+    </div>
+
+    <ul class="nav flex-column flex-grow-1">
+        <li class="nav-item">
+            <a class="nav-link active" th:href="@{/admin}">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/orders}">
+                <i class="bi bi-box-seam-fill"></i>
+                <span>Quản lý đơn hàng</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/accounts}">
+                <i class="bi bi-people-fill"></i>
+                <span>Quản lý tài khoản</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="bi bi-file-earmark-text-fill"></i>
+                <span>Quản lý Blog</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/ratings}">
+                <i class="bi bi-star-fill"></i>
+                <span>Ratings & Feedback</span>
+            </a>
+        </li>
+    </ul>
+
+    <form th:action="@{/logout}" method="post">
+        <button type="submit" class="logout-button">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+        </button>
+    </form>
+</nav>
+
+<div class="page-container">
+    <header class="page-header">
+        <h1 class="text-gray-800">Dashboard Overview</h1>
+    </header>
+
+    <main class="main-content">
+        <div class="container-fluid p-0">
+            <div class="row g-4 mb-4">
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="icon-container bg-primary-light">
+                                <i class="bi bi-person-plus-fill"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4 th:text="${todayMembers}">0</h4>
+                                <p>Today's Members</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <a th:href="@{/admin/accounts}" class="stat-card-link">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="icon-container bg-success-light">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4 th:text="${totalMembers}">0</h4>
+                                    <p>Total Accounts</p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="icon-container bg-info-light">
+                                <i class="bi bi-file-post"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4>3</h4>
+                                <p>Total Blogs</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <a th:href="@{/admin/ratings}" class="stat-card-link">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="icon-container bg-warning-light">
+                                    <i class="bi bi-star-half"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4 th:text="${totalFeedbacks}">0</h4>
+                                    <p>Total Ratings</p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-header">Thống kê thành viên theo tháng</div>
+                        <div class="card-body p-3">
+                            <canvas id="lineChart" style="max-height: 320px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="card">
+                        <div class="card-header">Cơ cấu thành viên</div>
+                        <div class="card-body p-3 d-flex justify-content-center align-items-center">
+                            <canvas id="pieChart" style="max-height: 320px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const pieLabels = /*[[${labels}]]*/ ['Coach', 'Premium Member', 'Normal Member'];
+    const pieData = /*[[${values}]]*/ [10, 25, 65];
+    const monthlyUserData = /*[[${monthlyUserData}]]*/ [5, 8, 12, 10, 15, 20, 18, 25, 22, 30, 28, 35];
+    /*]]>*/
+
+    // --- CẢI TIẾN: Cấu hình chung cho Chart ---
+    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+    const textColorMuted = getComputedStyle(document.documentElement).getPropertyValue('--text-color-muted').trim();
+    const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
+    const primaryColorLight = getComputedStyle(document.documentElement).getPropertyValue('--primary-color-light').trim();
+
+    Chart.defaults.font.family = "'Be Vietnam Pro', sans-serif";
+    Chart.defaults.color = textColorMuted;
+
+    // --- Biểu đồ tròn (Pie Chart) ---
+    new Chart(document.getElementById('pieChart'), {
+        type: 'pie',
+        data: {
+            labels: pieLabels,
+            datasets: [{
+                data: pieData,
+                backgroundColor: [primaryColor, '#17a2b8', '#6c757d'], // Giữ màu sắc để phân biệt
+                borderColor: '#fff',
+                borderWidth: 4, // CẢI TIẾN: Tăng border để các miếng bánh tách bạch hơn
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                datalabels: {
+                    color: '#fff',
+                    formatter: (value, ctx) => {
+                        let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        let percentage = (value * 100 / sum).toFixed(1) + "%";
+                        return percentage;
+                    },
+                    font: {
+                        weight: 'bold',
+                        size: 14
+                    }
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+
+    // --- Biểu đồ đường (Line Chart) ---
+    new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'New Members in ' + new Date().getFullYear(),
+                data: monthlyUserData,
+                borderColor: primaryColor,
+                backgroundColor: primaryColorLight, // CẢI TIẾN: Dùng màu nền nhạt từ biến CSS
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: primaryColor,
+                pointBorderColor: '#fff',
+                pointHoverRadius: 7,
+                pointHoverBackgroundColor: primaryColor,
+                pointRadius: 5, // CẢI TIẾN: Hiện rõ điểm trên đường
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                datalabels: {
+                    display: false // Ẩn label số trên line chart cho đỡ rối
+                },
+                legend: {
+                    display: false
+                },
+                tooltip: { // CẢI TIẾN: Tùy chỉnh tooltip
+                    backgroundColor: '#fff',
+                    titleColor: '#333',
+                    bodyColor: '#666',
+                    borderColor: borderColor,
+                    borderWidth: 1,
+                    padding: 10,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return ` ${context.parsed.y} new members`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: borderColor, // CẢI TIẾN: Dùng màu từ biến CSS
+                        drawBorder: false,
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+</script>
+</body>
+</html>

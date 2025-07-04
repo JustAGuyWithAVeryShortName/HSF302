@@ -1,0 +1,319 @@
+:root {
+    --primary: #007BFF;
+    --primary-gradient: linear-gradient(135deg, #007BFF, #00C6FF);
+    --success: #28a745;
+    --success-gradient: linear-gradient(135deg, #28a745, #20c997);
+    --secondary: #f4f7f6;
+    --white: #ffffff;
+    --text: #343a40;
+    --muted: #6c757d;
+    --light-gray: #e9ecef;
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --radius: 20px;
+    --gap: 1.5rem;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    background-color: var(--secondary);
+    color: var(--text);
+}
+
+.track-progress .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 1rem;
+}
+
+.track-progress h1 {
+    text-align: center;
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.track-progress .subtitle {
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 4rem;
+}
+
+/* ==== Thống kê đầu trang ==== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--gap);
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-top: 4px solid var(--primary);
+}
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card.primary-stat {
+    background: var(--primary-gradient);
+    color: var(--white);
+    border-top: none;
+}
+
+.stat-card.primary-stat .icon,
+.stat-card.primary-stat h3,
+.stat-card.primary-stat .stat-number {
+    color: var(--white);
+}
+
+.stat-card .icon {
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.stat-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--muted);
+}
+
+.stat-card p.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+/* ==== Phục hồi sức khỏe và milestones ==== */
+.progress-card, .milestones-card {
+    background: var(--white);
+    padding: 2.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 3rem;
+}
+
+.progress-card h2, .milestones-card h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+}
+
+.progress-card .progress-summary {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+}
+
+.progress-bar-container {
+    background: var(--light-gray);
+    border-radius: 50px;
+    height: 25px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--success-gradient);
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding-right: 10px;
+    transition: width 0.8s ease-in-out;
+}
+
+.next-goal {
+    font-size: 1rem;
+    color: var(--muted);
+    text-align: right;
+}
+
+/* ==== Milestones grid ==== */
+.milestones-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.milestone-badge {
+    padding: 0.8rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: transform 0.2s ease;
+}
+
+.milestone-badge:hover {
+    transform: translateY(-3px);
+}
+
+.milestone-badge.achieved {
+    background: var(--success);
+    color: white;
+}
+
+.milestone-badge.upcoming {
+    background: var(--light-gray);
+    color: var(--muted);
+    border: 1px dashed var(--muted);
+}
+
+/* ==== Bảng tiến độ từng ngày ==== */
+.daily-step-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.95rem;
+}
+
+.daily-step-table th, .daily-step-table td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 8px;
+    text-align: center;
+}
+
+.daily-step-table th {
+    background-color: #f4f4f4;
+    font-weight: 600;
+}
+
+.text-gray {
+    color: #999;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.badge-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.badge-neutral {
+    background-color: #e2e3e5;
+    color: #6c757d;
+}
+
+/* ==== Form update ==== */
+.update-form {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+}
+
+.update-form input[type="number"] {
+    width: 60px;
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.btn-update {
+    padding: 4px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-update:hover {
+    background-color: #0056b3;
+}
+
+/* ==== Accordion ==== */
+.accordion-item {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    background: var(--white);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+}
+
+.accordion-button {
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 1rem 1.25rem;
+    background-color: #f9f9f9;
+    color: var(--text);
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--primary);
+    color: white;
+}
+
+.accordion-body {
+    padding: 1.25rem;
+}
+
+/* ==== Responsive ==== */
+@media (max-width: 768px) {
+    .track-progress h1 {
+        font-size: 2.2rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* ==== Logo at Top ==== */
+.logo-container {
+    text-align: center;
+    margin: 2rem 0 1.5rem;
+}
+
+.logo-container img {
+    height: 145px;
+    transition: transform 0.3s ease;
+}
+
+.logo-container img:hover {
+    transform: scale(1.05);
+}
+.daily-step-table tr.successful {
+    background-color: #e6f9ec; /* Xanh nhạt */
+}
+
+.daily-step-table tr.failed {
+    background-color: #ffe8e8; /* Đỏ nhạt */
+}
+
+.daily-step-table tr.pending {
+    background-color: #f0f0f0; /* Xám */
+}

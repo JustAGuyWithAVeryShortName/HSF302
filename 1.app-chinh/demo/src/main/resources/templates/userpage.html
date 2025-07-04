@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>User Plan - SmokeLite</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/userpage_complete.css}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<header class="main-header">
+    <div class="logo-container">
+        <a th:href="@{/home}"> <img th:src="@{/images/1.png}" alt="SmokeLite Logo" class="logo" />
+        </a>
+    </div>
+    <nav class="main-nav">
+        <a th:href="@{/home}" class="nav-item">Home</a>
+        <a th:href="@{/member}" class="nav-item">Member</a>
+        <a th:href="@{/about_us}" class="nav-item">About Us</a>
+
+        <div th:replace="~{fragments/noticeDropdown :: noticeDropdown}"></div>
+
+
+        <a th:href="@{/login}" class="nav-item" sec:authorize="!isAuthenticated()">Login</a>
+
+        <div class="nav-item dropdown" sec:authorize="isAuthenticated()">
+            <button class="dropdown-toggle">
+                Hi, <span th:text="${fullName}">User</span> <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu">
+                <a th:href="@{/profile}" class="dropdown-item">Profile</a>
+                <a th:href="@{/dashboard}" class="dropdown-item">View Plan</a>
+                <th:block sec:authorize="isAuthenticated()">
+                    <th:block th:if="${isUsernameLogin}">
+                        <a th:href="@{/change-password}" class="dropdown-item">Change Password</a>
+                    </th:block>
+                </th:block>
+
+                <form th:action="@{/logout}" method="post" class="logout-form">
+                    <button type="submit" class="dropdown-item">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main class="main-content">
+
+    <div class="container">
+        <div class="welcome-box">
+            <h2>Good to See You Again!</h2>
+            <p>Your journey to a smoke-free life continues. Stay strong, you're doing great!</p>
+        </div>
+
+        <div class="grid-box">
+            <div class="card">
+                <i class="fas fa-calendar-check icon"></i>
+                <h3>My Quitting Plan</h3>
+                <p>Review and update your personalized plan to quit smoking.</p>
+                <a th:if="${hasPlan}" th:href="@{/user/plan}" class="btn-primary">View My Plan</a>
+                <a th:if="${!hasPlan}" th:href="@{/questionnaire}" class="btn-primary">Create Plan</a>
+            </div>
+            <div class="card">
+                <i class="fas fa-chart-line icon"></i>
+                <h3>Track Progress</h3>
+                <p>See how your health improves, money grows, and milestones unfold.</p>
+                <a th:href="@{/track-progress}" class="btn-primary">View Progress</a>
+            </div>
+            <div class="card">
+                <i class="fas fa-users icon"></i>
+                <h3>Coach Support</h3>
+                <p>Get expert guidance and motivation from your quit coach along the way.</p>
+
+                <a href="#"
+                   th:attr="data-member=${memberType}"
+                   onclick="handleSupportClick(this)"
+                   class="btn-primary">
+                    Find Support
+                </a>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<footer class="main-footer">
+    <div class="container">
+        <div class="footer-address">
+            <p class="footer-heading"><strong>Address</strong></p>
+            <p>Thu Duc, HCM</p>
+            <div class="social-icons">
+                <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/24/facebook--v1.png" alt="Facebook" /></a>
+                <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/24/github.png" alt="GitHub" /></a>
+                <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/24/whatsapp.png" alt="WhatsApp" /></a>
+            </div>
+        </div>
+        <p class="copyright">&copy; 2025 SmokeLite. All Rights Reserved.</p>
+    </div>
+</footer>
+
+<a href="#" class="back-to-top"><i class="fas fa-arrow-up"></i></a>
+
+<!-- Notice dropdown script -->
+<script>
+    function toggleNoticeDropdown() {
+        const dropdown = document.getElementById("noticeDropdown");
+        dropdown.classList.toggle("show");
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.matches('.dropdown-toggle-notice')) {
+            const dropdowns = document.getElementsByClassName("dropdown-menu-notice");
+            for (let i = 0; i < dropdowns.length; i++) {
+                const openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+    <div th:replace="~{fragments/noticeDropdown :: noticeDropdown}"></div>
+</script>
+
+<script>
+    function handleSupportClick(el) {
+        const memberType = el.getAttribute("data-member");
+
+        if ( memberType === 'PREMIUM') {
+            window.location.href = '/messenger';
+        } else {
+            // Hiện thông báo tùy ý
+            alert("This feature is available for PREMIUM members only.\nPlease upgrade your plan to access support.");
+        }
+    }
+</script>
+
+<script th:if="${noPlanMessage}" th:inline="javascript">
+    /*<![CDATA[*/
+    var msg = /*[[${noPlanMessage}]]*/ "";
+    alert(msg);
+    /*]]>*/
+</script>
+
+
+
+
+</body>
+</html>

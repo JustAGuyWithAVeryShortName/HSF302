@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Quit Smoking Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/user-plan.css}" />
+</head>
+<body>
+<div class="container" th:if="${plan != null}">
+    <header class="header">
+        <a th:href="@{/dashboard}">
+            <img th:src="@{/images/1.png}" alt="SmokeLite Logo" class="logo" />
+        </a>
+        <h2 class="main-title">One Step Closer</h2>
+        <p class="motivation-quote">"A journey of a thousand miles begins with a single step."</p>
+    </header>
+
+    <div class="stat-cards" th:if="${stats != null}">
+        <div class="card success">
+            <div class="icon"><i class="fa-solid fa-leaf"></i></div>
+            <div class="value" th:text="${stats.daysSmokeFree}">0</div>
+            <div class="label">Smoke-free Days</div>
+        </div>
+        <div class="card">
+            <div class="icon"><i class="fa-solid fa-calendar-check"></i></div>
+            <div class="value" th:text="${stats.daysRemaining}">0</div>
+            <div class="label">Days to Goal</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <section class="plan-details">
+            <h3><i class="fa-solid fa-bullseye"></i> Your Quit Plan</h3>
+            <p>
+                <strong><i class="fa-solid fa-flag-checkered"></i> Target Date:</strong>
+                <span th:text="${#temporals.format(plan.targetDate, 'dd-MM-yyyy')}"></span>
+            </p>
+            <p>
+                <strong><i class="fa-solid fa-shoe-prints"></i> Method:</strong>
+                <span th:text="${plan.stages}"></span>
+            </p>
+
+            <div>
+                <strong><i class="fa-solid fa-lightbulb"></i> Your Reasons:</strong>
+                <ul>
+                    <li th:each="reason : ${plan.reasons}" th:text="${reason}">Example Reason</li>
+                </ul>
+            </div>
+
+            <div th:if="${plan.customPlan != null and !plan.customPlan.isBlank()}">
+                <strong><i class="fa-solid fa-list-check"></i> Custom Plan:</strong>
+                <pre th:text="${plan.customPlan}"></pre>
+            </div>
+
+            <div th:if="${progress != null}">
+                <p><strong><i class="fa-solid fa-person-running"></i> Your Progress:</strong></p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" th:style="'width:' + ${progress} + '%'" th:text="${progress + '%'}"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="calendar-section" th:if="${calendar != null}">
+            <div class="calendar-title-bar">
+                <h3><i class="fa-regular fa-calendar-days"></i> <span th:text="${monthDisplay}">Schedule</span></h3>
+
+                <form method="get" action="/user/plan" class="calendar-form">
+                    <select name="month" id="month">
+                        <option th:each="m : ${#numbers.sequence(1,12)}"
+                                th:value="${m}"
+                                th:text="${T(java.time.Month).of(m)}"
+                                th:selected="${T(java.time.YearMonth).parse(calendar.monthName()).monthValue == m}">
+                        </option>
+                    </select>
+
+                    <select name="year" id="year">
+                        <option th:each="y : ${#numbers.sequence(2024, 2030)}"
+                                th:value="${y}"
+                                th:text="${y}"
+                                th:selected="${T(java.time.YearMonth).parse(calendar.monthName()).year == y}">
+                        </option>
+                    </select>
+
+                    <button type="submit" class="btn btn-primary">Go</button>
+                </form>
+            </div>
+
+            <div class="calendar">
+                <div class="calendar-header" th:each="dayName : ${calendar.weekDays()}" th:text="${dayName}"></div>
+                <div th:attr="data-title=${day.status() == 'start-date' ? 'Start Date' :
+                                          day.status() == 'target-date' ? 'Target Date' :
+                                          day.status() == 'today' ? 'Today' : null}"
+                     th:class="'calendar-day ' + ${day.status()}"
+                     th:each="day : ${calendar.days()}"
+                     th:text="${day.dayNumber() != 0 ? day.dayNumber() : ''}"></div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <a href="/plan/edit" class="edit-link"><i class="fa-solid fa-pen-to-square"></i> Edit Plan</a>
+        <a href="/plan/new" class="edit-link"><i class="fa-solid fa-pen-to-square"></i> New Plan</a>
+    </footer>
+</div>
+</body>
+</html>

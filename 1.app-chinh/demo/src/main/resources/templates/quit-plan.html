@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Start Your Quit Journey</title>
+  <!-- Load Tailwind CSS via CDN for styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for a nicer typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Use the Inter font family defined in the link above */
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    /* Simple transition for a smoother user experience */
+    .transition-all {
+      transition: all 0.2s ease-in-out;
+    }
+    /* Hide the textarea containers by default */
+    #otherReasonContainer,
+    #customPlanContainer {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
+
+<!-- Main container with modern styling: shadow, rounded corners, etc. -->
+<main class="container bg-white w-full max-w-2xl mx-auto rounded-xl shadow-lg p-6 sm:p-8 lg:p-10">
+  <div class="text-center mb-8">
+    <h1 class="text-3xl sm:text-4xl font-bold text-slate-800">Start Your New Journey</h1>
+    <p class="mt-2 text-slate-600">Let’s create an effective quit smoking plan tailored just for you.</p>
+  </div>
+
+  <!-- Thymeleaf error message block, styled for better visibility -->
+  <!-- The th:if block will only be rendered by the server if 'dateError' is present -->
+  <div th:if="${dateError}" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md" role="alert">
+    <p class="font-bold">Error</p>
+    <p th:text="${dateError}">The provided dates are invalid. Please check them and try again.</p>
+  </div>
+
+  <!-- The form itself, with Thymeleaf attributes preserved -->
+  <form th:action="@{/plan/generate}" th:object="${plan}" method="post" class="space-y-8">
+
+    <!-- Fieldset 1: Motivation -->
+    <fieldset>
+      <legend class="text-lg font-semibold text-slate-800 mb-4">1. What is your motivation?</legend>
+      <div class="space-y-3">
+        <!-- Custom styled checkboxes for better UX -->
+        <label class="flex items-center p-4 border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
+          <input type="checkbox" name="reasons" value="health" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-4 text-slate-700">Improve health</span>
+        </label>
+        <label class="flex items-center p-4 border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
+          <input type="checkbox" name="reasons" value="family" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-4 text-slate-700">For family and loved ones</span>
+        </label>
+        <label class="flex items-center p-4 border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
+          <input type="checkbox" name="reasons" value="financial" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-4 text-slate-700">Save money</span>
+        </label>
+        <label class="flex items-center p-4 border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
+          <input type="checkbox" name="reasons" value="smell" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-4 text-slate-700">Eliminate bad smell</span>
+        </label>
+        <label class="flex items-center p-4 border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 transition-all has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
+          <input type="checkbox" name="reasons" value="other" id="reasonOtherCheckbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-4 text-slate-700">Other reasons</span>
+        </label>
+      </div>
+      <div id="otherReasonContainer" class="mt-4">
+        <textarea name="reasonDetails" rows="3" placeholder="Please share more about your reasons..." class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"></textarea>
+      </div>
+    </fieldset>
+
+    <!-- Fieldset 2: Dates -->
+    <div class="grid sm:grid-cols-2 gap-6">
+      <fieldset>
+        <label for="startDate" class="block text-lg font-semibold text-slate-800 mb-2">2. Choose your start date</label>
+        <input type="date" id="startDate" th:field="*{startDate}" required class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"/>
+        <p class="mt-2 text-sm text-slate-500">The day you commit to start.</p>
+      </fieldset>
+      <fieldset>
+        <label for="targetDate" class="block text-lg font-semibold text-slate-800 mb-2">3. Set your target date</label>
+        <input type="date" id="targetDate" th:field="*{targetDate}" required class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"/>
+        <p class="mt-2 text-sm text-slate-500">Your goal to be smoke-free.</p>
+      </fieldset>
+    </div>
+
+    <!-- Fieldset 4: Smoking & Spending Info -->
+    <div class="grid sm:grid-cols-2 gap-6">
+      <fieldset>
+        <label for="dailySmokingCigarettes" class="block text-lg font-semibold text-slate-800 mb-2">5. Số điếu hút mỗi ngày</label>
+        <input type="number" id="dailySmokingCigarettes" th:field="*{dailySmokingCigarettes}" min="0" required
+               class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+               placeholder="Ví dụ: 10"/>
+        <p class="mt-2 text-sm text-slate-500">Trung bình bạn hút bao nhiêu điếu mỗi ngày?</p>
+      </fieldset>
+
+      <fieldset>
+        <label for="dailySpending" class="block text-lg font-semibold text-slate-800 mb-2">6. Chi tiêu mỗi ngày (VNĐ)</label>
+        <input type="number" id="dailySpending" th:field="*{dailySpending}" min="0" step="1000" required
+               class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+               placeholder="Ví dụ: 20000"/>
+        <p class="mt-2 text-sm text-slate-500">Số tiền bạn dùng để mua thuốc mỗi ngày.</p>
+      </fieldset>
+    </div>
+
+    <!-- Fieldset 3: Approach -->
+    <fieldset>
+      <label for="stages" class="block text-lg font-semibold text-slate-800 mb-2">4. Choose your approach</label>
+      <select id="stages" th:field="*{stages}" required class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white">
+        <option value="" disabled selected>-- Select an approach --</option>
+        <option value="Gradual reduction">Gradual reduction</option>
+        <option value="Cold turkey (quit abruptly)">Cold turkey (quit abruptly)</option>
+        <option value="Nicotine replacement therapy">Nicotine replacement therapy</option>
+        <option value="Custom">Create a custom detailed plan</option>
+      </select>
+    </fieldset>
+
+    <!-- Container for the custom plan textarea -->
+    <div id="customPlanContainer">
+      <fieldset>
+        <label for="customPlan" class="block text-lg font-semibold text-slate-800 mb-2">Your detailed plan</label>
+        <textarea id="customPlan" th:field="*{customPlan}" rows="4" placeholder="e.g., Week 1: Only smoke after meals. Week 2: Reduce by 3 cigarettes per day..." class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"></textarea>
+      </fieldset>
+    </div>
+
+    <!-- Submission Button -->
+    <div class="pt-4">
+      <button type="submit" class="w-full bg-green-600 text-white font-bold text-lg py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all">
+        Create My Plan
+      </button>
+    </div>
+  </form>
+</main>
+
+<script>
+  // This script runs after the document content has been loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    // Get references to the interactive elements
+    const reasonOtherCheckbox = document.getElementById('reasonOtherCheckbox');
+    const otherReasonContainer = document.getElementById('otherReasonContainer');
+    const stagesSelect = document.getElementById('stages');
+    const customPlanContainer = document.getElementById('customPlanContainer');
+
+    // Function to toggle the "Other Reason" textarea
+    const toggleOtherReason = () => {
+      otherReasonContainer.style.display = reasonOtherCheckbox.checked ? 'block' : 'none';
+    };
+
+    // Function to toggle the "Custom Plan" textarea
+    const toggleCustomPlan = () => {
+      customPlanContainer.style.display = stagesSelect.value === 'Custom' ? 'block' : 'none';
+    };
+
+    // Add event listeners to trigger the toggle functions on user input
+    reasonOtherCheckbox.addEventListener('change', toggleOtherReason);
+    stagesSelect.addEventListener('change', toggleCustomPlan);
+
+    // Run the toggle functions on page load to handle pre-filled forms
+    // (e.g., when the server sends back a form with validation errors)
+    toggleOtherReason();
+    toggleCustomPlan();
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Your Quit Smoking Journey</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" th:href="@{/css/track-progress.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+    <style>
+        .alert-warning {
+            border-left: 6px solid #ffc107;
+            background-color: #fff9e5;
+            color: #856404;
+            padding: 1rem 1.25rem;
+            font-weight: 500;
+            font-size: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        }
+        .daily-step-table tr.successful { background-color: #e6f9ec; }
+        .daily-step-table tr.failed { background-color: #ffe8e8; }
+        .stat-number { transition: all 0.4s ease-in-out; transform-origin: center; }
+        .stat-number:hover { transform: scale(1.08); }
+        .progress-bar {
+            transition: width 1s ease-in-out, background-color 0.3s ease;
+            background-image: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1 }
+            50% { opacity: 0.85 }
+            100% { opacity: 1 }
+        }
+        .btn-update {
+            padding: 6px 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .btn-update:active { transform: scale(0.95); }
+        .track-progress .container {
+            box-shadow: 0 10px 60px rgba(0,0,0,0.05);
+            border-radius: 16px;
+            background-color: white;
+            padding: 3rem 2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="logo-container text-center my-4">
+    <a th:href="@{/dashboard}">
+        <img th:src="@{/images/1.png}" alt="SmokeLite Logo" style="height: 120px; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
+    </a>
+</div>
+
+<section class="track-progress">
+    <div class="container">
+        <h1><i class="fas fa-rocket"></i> Your Quit Smoking Journey</h1>
+        <div th:if="${missedTarget}" class="alert alert-warning mt-3" role="alert">
+            ⚠️ You've exceeded your smoking target on at least one day. Stay strong and keep going!
+        </div>
+        <p class="subtitle text-center">Every smoke-free day is a victory. See how far you’ve come!</p>
+
+        <!-- Overview stats -->
+        <div class="stats-grid">
+            <div class="stat-card primary-stat">
+                <i class="fas fa-calendar-check icon"></i>
+                <h3>Smoke-Free Days</h3>
+                <p class="stat-number" th:data-target="${daysSinceQuit}" th:text="${daysSinceQuit} + ' days'">0 days</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-piggy-bank icon"></i>
+                <h3>Money Saved</h3>
+                <p class="stat-number" th:text="${moneySaved} + ' VND'">0 VND</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-smoking-ban icon"></i>
+                <h3>Cigarettes Avoided</h3>
+                <p class="stat-number" th:text="${cigarettesAvoided}">0</p>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-card">
+            <h2><i class="fas fa-heartbeat"></i> Health Recovery</h2>
+            <p class="progress-summary" th:text="${healthProgress.currentStatus}">Loading...</p>
+            <div class="progress-bar-container">
+                <div class="progress-bar" th:style="'width:' + ${healthProgress.percentage} + '%'">
+                    <span th:text="${healthProgress.percentage} + '%'">0%</span>
+                </div>
+            </div>
+            <p class="next-goal text-end"><strong>Next milestone:</strong> <span th:text="${healthProgress.nextMilestone}">---</span></p>
+        </div>
+
+        <!-- Milestones Section -->
+        <div class="milestones-card">
+            <h2><i class="fas fa-award"></i> Achieved Milestones</h2>
+            <div class="milestones-grid">
+                <div class="milestone-badge achieved" th:each="m : ${achievedMilestones}">
+                    <i class="fas fa-check-circle"></i>
+                    <span th:text="${m.name}">Milestone</span>
+                </div>
+                <div class="milestone-badge upcoming" th:each="m : ${upcomingMilestones}">
+                    <i class="fas fa-flag-checkered"></i>
+                    <span th:text="${m.name}">Coming Soon</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Progress by Week -->
+        <div class="daily-steps-card">
+            <h2><i class="fas fa-list-check"></i> Daily Progress (by Week)</h2>
+            <div class="accordion" id="weeklyProgressAccordion">
+                <div th:each="entry : ${stepsByWeek}">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    th:attr="data-bs-target='#week-'+${entry.key}" aria-expanded="false"
+                                    th:attrappend="aria-controls='week-'+${entry.key}">
+                                Week [[${entry.key}]]
+                            </button>
+                        </h3>
+                        <div th:id="'week-'+${entry.key}" class="accordion-collapse collapse" data-bs-parent="#weeklyProgressAccordion">
+                            <div class="accordion-body">
+                                <table class="daily-step-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Day</th>
+                                        <th>Target</th>
+                                        <th>Actual</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="step : ${entry.value}"
+                                        th:class="${(step.actualCigarettes == null) ? 'pending' :
+                ((step.targetCigarettes != null and step.actualCigarettes > step.targetCigarettes) ? 'failed' : 'successful')}">
+
+
+                                    <td th:text="${#temporals.format(step.date, 'dd/MM/yyyy')}">--</td>
+                                        <td th:text="${step.dayIndex}">--</td>
+                                        <td th:text="${step.targetCigarettes + ' 🚬'}">--</td>
+                                        <td class="fw-bold"
+                                            th:classappend="${step.actualCigarettes != null and step.targetCigarettes != null and step.actualCigarettes > step.targetCigarettes} ? 'text-danger' : ''">
+                                            <span th:text="${step.actualCigarettes != null ? step.actualCigarettes + ' 🚬' : 'Not entered'}"></span>
+                                            <span th:if="${step.actualCigarettes != null and step.targetCigarettes != null and step.actualCigarettes > step.targetCigarettes}" title="Exceeded target"> ❗</span>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-check-circle text-success"
+                                               th:if="${step.actualCigarettes != null and step.targetCigarettes != null and step.actualCigarettes <= step.targetCigarettes}"></i>
+
+                                            <i class="fas fa-times-circle text-danger"
+                                               th:if="${step.actualCigarettes != null and step.targetCigarettes != null and step.actualCigarettes > step.targetCigarettes}"></i>
+
+                                            <i class="fas fa-question-circle text-muted"
+                                               th:if="${step.actualCigarettes == null}"></i>
+
+                                            <span class="d-none" th:text="'[debug: actual=' + step.actualCigarettes + ', target=' + step.targetCigarettes + ']'"></span>
+                                        </td>
+
+
+                                        <td>
+                                            <form th:action="@{/track-progress/update/{id}(id=${step.id})}" method="post" class="update-form">
+                                                <input type="number" name="actualCigarettes"
+                                                       min="0" placeholder="e.g., 3"
+                                                       th:disabled="${step.date > T(java.time.LocalDate).now()}" required />
+
+                                                <input type="hidden" name="planId" th:value="${planId}" />
+                                                <button type="submit" class="btn-update">Save</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const counters = document.querySelectorAll('.stat-number[data-target]');
+        const speed = 200;
+        counters.forEach(counter => {
+            const animate = () => {
+                const target = +counter.getAttribute('data-target');
+                const count = +counter.innerText.replace(/[^\d.-]/g, '');
+                const inc = target / speed;
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + inc);
+                    setTimeout(animate, 10);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+            animate();
+        });
+    });
+</script>
+</body>
+</html>

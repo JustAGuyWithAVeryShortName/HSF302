@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>SmokeLite</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+</head>
+<body>
+
+<header class="main-header">
+    <div class="logo-container">
+        <a th:href="@{/home}"> <img th:src="@{/images/1.png}" alt="SmokeLite Logo" class="logo" /></a>
+    </div>
+
+    <nav class="main-nav">
+        <a th:href="@{/home}" class="nav-item active">Home</a>
+        <a th:href="@{/member}" class="nav-item">Member</a>
+        <a th:href="@{/about_us}" class="nav-item">About Us</a>
+
+        <div th:replace="~{fragments/noticeDropdown :: noticeDropdown}"></div>
+
+
+
+        <a th:href="@{/login}" class="nav-item" sec:authorize="!isAuthenticated()">Login</a>
+
+        <div class="nav-item dropdown" sec:authorize="isAuthenticated()">
+            <button class="dropdown-toggle">
+                Hi, <span th:text="${fullName}">User</span> <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu">
+                <a th:href="@{/profile}" class="dropdown-item">Profile</a>
+                <a th:href="@{/dashboard}" class="dropdown-item">View Plan</a>
+
+                <th:block sec:authorize="isAuthenticated()">
+                    <th:block th:if="${isUsernameLogin}">
+                        <a th:href="@{/change-password}" class="dropdown-item">Change Password</a>
+                    </th:block>
+                </th:block>
+
+                <form th:action="@{/logout}" method="post" class="logout-form">
+                    <button type="submit" class="dropdown-item">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Take Control. Live Smoke-Free.</h1>
+            <p class="hero-intro1"><strong>SmokeLite is an online platform</strong> dedicated to helping individuals quit smoking and embrace a healthier, smoke-free life.</p>
+            <p class="hero-intro2">We understand that quitting smoking is a challenging journey, but you don’t have to go through it alone. At SmokeLite, we provide you with the tools, guidance, and community support you need to stay motivated and succeed —one breath at a time.</p>
+            <a th:href="@{/login}" class="btn-primary">Get Started Today</a>
+        </div>
+        <div class="hero-image">
+            <img th:src="@{/images/2.png}" alt="Man happily quitting smoking" class="responsive-image">
+        </div>
+    </section>
+
+    <section class="about-us-section">
+        <div class="container">
+            <h2 class="section-title">Why Trust SmokeLite?</h2>
+            <p class="section-description">At SmokeLite, we don’t just offer tools—we offer understanding, guidance, and proven support. Our platform was built on evidence-based methods and insights from real people who’ve walked the path to a smoke-free life....</p>
+            <a th:href="@{/about_us}" class="btn-primary">Read More</a>
+        </div>
+    </section>
+
+    <section id="leaderboard" class="leaderboard-section">
+        <div class="container">
+            <h2 class="section-title">Achievement Leaderboard</h2>
+            <p class="section-description">Celebrate progress and get inspired by the top members on our platform.</p>
+            <div class="leaderboard-container">
+                <table class="leaderboard-table">
+                    <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Member</th>
+                        <th>Days Smoke-Free</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="user : ${leaderboardUsers}">
+                        <td data-label="Rank" th:text="${user.rank}" class="rank"></td>
+                        <td data-label="Member" th:text="${user.name}"></td>
+                        <td data-label="Days Smoke-Free" th:text="${user.daysSmokeFree}" class="days"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    <div class="chat-rating-wrapper">
+        <section class="chat-section">
+            <div class="container">
+                <h2 class="section-title">Community Chat</h2>
+
+                <div class="chat-table-wrapper">
+                    <table class="chat-table" id="chat-table">
+                    </table>
+                </div>
+
+                <form class="chat-form" id="chat-form">
+                    <textarea id="message-content" placeholder="Type your message..." required></textarea>
+                    <button class="btn-primary" type="submit">Send</button>
+                </form>
+            </div>
+        </section>
+        <section class="rating-section">
+            <div class="rating-container">
+                <h2 class="section-title">Feedback & Rating</h2>
+                <div id="feedbackMessage" style="margin-bottom: 10px; font-weight: bold;"></div>
+
+                <div id="feedbackFormContainer" sec:authorize="isAuthenticated()">
+                    <form id="feedback-form">
+                        <div class="star-rating">
+                            <input type="radio" id="star5" name="rating" value="5" />
+                            <label for="star5">★</label>
+
+                            <input type="radio" id="star4" name="rating" value="4" />
+                            <label for="star4">★</label>
+
+                            <input type="radio" id="star3" name="rating" value="3" />
+                            <label for="star3">★</label>
+
+                            <input type="radio" id="star2" name="rating" value="2" />
+                            <label for="star2">★</label>
+
+                            <input type="radio" id="star1" name="rating" value="1" />
+                            <label for="star1">★</label>
+                        </div>
+
+                        <p>Share your experience:</p>
+                        <textarea id="feedback-comment" placeholder="Enter your feedback..." required></textarea>
+                        <button type="submit" class="btn-feedback">Send</button>
+                    </form>
+                </div>
+
+                <div id="notMemberMessage" sec:authorize="!isAuthenticated()" class="not-member-message">
+                    <p>Please <a th:href="@{/login}">log in</a> as a Member to submit feedback.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">Features</h2>
+            <div class="feature-grid">
+                <div class="feature-item">Your Smoking Status</div>
+                <div class="feature-item">Plan Builder</div>
+                <div class="feature-item">Progress Tracker</div>
+                <div class="feature-item">Notifications</div>
+                <div class="feature-item">Rating & Feedback System</div>
+                <div class="feature-item">Live Coaching Support</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="blog" class="blog-section">
+        <div class="container">
+            <h2 class="section-title">Success Stories & Tips</h2>
+            <p class="section-description">Read inspiring stories from our community and find useful tips for your journey.</p>
+            <div class="blog-grid">
+                <div class="blog-card" th:each="post : ${blogPosts}">
+                    <img th:src="@{${post.imageUrl}}" alt="Blog Post Image" class="blog-card-img">
+                    <div class="blog-card-content">
+                        <h3 class="blog-card-title" th:text="${post.title}"></h3>
+                        <p class="blog-card-excerpt" th:text="${post.excerpt}"></p>
+                        <a th:href="@{'/blog/' + ${post.id}}" class="blog-card-link">Read More &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+</main>
+
+<footer class="main-footer">
+    <div class="container">
+        <div class="footer-address">
+            <p class="footer-heading"><strong>Address</strong></p>
+            <p>Thu Duc, Hcm</p>
+            <div class="social-icons">
+                <a href="#" class="social-link" aria-label="Facebook"><img src="https://img.icons8.com/ios-filled/24/facebook--v1.png" alt="Facebook" /></a>
+                <a href="#" class="social-link" aria-label="GitHub"><img src="https://img.icons8.com/ios-filled/24/github.png" alt="GitHub" /></a>
+                <a href="#" class="social-link" aria-label="WhatsApp"><img src="https://img.icons8.com/ios-filled/24/whatsapp.png" alt="WhatsApp" /></a>
+            </div>
+        </div>
+        <p class="copyright">&copy; 2025 SmokeLite. All Rights Reserved.</p>
+    </div>
+</footer>
+
+<a href="#" class="back-to-top"><i class="fas fa-arrow-up"></i></a>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const currentUsername = /*[[${finalUsername}]]*/ 'anonymous';
+    const isAuthenticatedUser = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
+    /*]]>*/
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+<script src="/js/chat.js"></script>
+<script src="/js/feedback.js"></script>
+
+
+</body>
+</html>
