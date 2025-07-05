@@ -24,8 +24,13 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.Swp2Application.executor": "Run",
     "git-widget-placeholder": "main",
     "last_opened_file_path": "D:/HSF302_Project",
     "node.js.detected.package.eslint": "true",
@@ -65,7 +70,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1751645073153</updated>
-      <workItem from="1751645074842" duration="892000" />
+      <workItem from="1751645074842" duration="1123000" />
     </task>
     <servers />
   </component>
