@@ -3,197 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Successful</title>
+    <title>Payment Success - SmokeLite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
-        :root {
-            --primary-color: #4A90E2; /* Bright Blue */
-            --primary-hover-color: #357ABD;
-            --background-gradient-start: #E9F0FA;
-            --background-gradient-end: #F8F9FA;
-            --card-background: #ffffff;
-            --heading-color: #2c3e50; /* Darker, slightly desaturated blue */
-            --text-color: #555555;
-            --divider-color: #e0e6ed;
-            --card-shadow: rgba(74, 144, 226, 0.2);
-        }
-
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end));
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .payment-card {
-            background-color: var(--card-background);
+        .success-container {
+            background: white;
             border-radius: 20px;
-            box-shadow: 0 15px 35px var(--card-shadow);
-            padding: 45px;
+            padding: 40px;
             text-align: center;
-            max-width: 480px;
-            width: 100%;
-            border-top: 6px solid var(--primary-color);
-            position: relative;
-            overflow: hidden;
-            /* Animation for the card appearing */
-            animation: card-appear 0.6s ease-out forwards;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
         }
-
-        /* The content inside will have a staggered animation */
-        .card-content > * {
-            opacity: 0;
-            transform: translateY(10px);
-            animation: content-appear 0.6s ease-out forwards;
-        }
-
-        /* Staggered animation delays */
-        .card-content .success-icon { animation-delay: 0.3s; }
-        .card-content h2 { animation-delay: 0.45s; }
-        .card-content .message { animation-delay: 0.6s; }
-        .card-content .divider { animation-delay: 0.75s; }
-        .card-content .receipt-info { animation-delay: 0.9s; }
-        .card-content .actions { animation-delay: 1.05s; }
-
-
         .success-icon {
-            width: 70px;
-            height: 70px;
-            margin: 0 auto 20px auto;
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 20px;
         }
-
-        .success-icon .circle {
-            fill: var(--primary-color);
-        }
-
-        .success-icon .checkmark {
-            fill: none;
-            stroke: white;
-            stroke-width: 5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            stroke-dasharray: 48;
-            stroke-dashoffset: 48;
-            animation: draw-checkmark 0.4s 0.5s ease-out forwards;
-        }
-
-        h2 {
-            font-size: 2.5em; /* 40px */
-            font-weight: 700;
-            margin: 0 0 15px 0;
-            color: var(--heading-color);
-        }
-
-        .message {
-            font-size: 1.1em; /* 18px */
-            line-height: 1.6;
-            margin: 0;
-        }
-
-        /* A styled horizontal rule */
-        .divider {
-            border: 0;
-            height: 1px;
-            background-color: var(--divider-color);
-            margin: 30px 0;
-        }
-
-        /* New confirmation text style */
-        .receipt-info {
-            font-size: 0.95em; /* 15px */
-            color: #777;
-        }
-
-        .actions {
-            margin-top: 40px;
-        }
-
-        .btn {
-            display: inline-block;
-            text-decoration: none;
-            color: white;
-            background-color: var(--primary-color);
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-size: 1.1em;
+        .success-title {
+            color: #333;
+            font-size: 2rem;
             font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .success-message {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .order-details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .order-details h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+        .detail-label {
+            font-weight: 500;
+            color: #666;
+        }
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+        }
+        .membership-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .membership-vip {
+            background: #ffd700;
+            color: #333;
+        }
+        .membership-premium {
+            background: #ff6b6b;
+            color: white;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
             transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-
-        .btn:hover {
-            background-color: var(--primary-hover-color);
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 10px 25px rgba(74, 144, 226, 0.35);
+        .btn-primary {
+            background: #667eea;
+            color: white;
         }
-
-        /* Keyframe Animations */
-        @keyframes draw-checkmark {
-            to {
-                stroke-dashoffset: 0;
-            }
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
         }
-
-        @keyframes card-appear {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
         }
-
-        @keyframes content-appear {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
         }
-
     </style>
 </head>
 <body>
-
-<div class="payment-card">
-    <div class="card-content">
-
+    <div class="success-container">
         <div class="success-icon">
-            <svg viewBox="0 0 52 52">
-                <circle class="circle" cx="26" cy="26" r="25"/>
-                <path class="checkmark" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-            </svg>
+            <i class="fas fa-check-circle"></i>
         </div>
 
-        <h2>Payment Successful</h2>
+        <h1 class="success-title">Payment Successful!</h1>
 
-        <p class="message">
-            Your membership is now active. Welcome aboard!
-        </p>
-
-        <hr class="divider" />
-
-        <p class="receipt-info">
-            "This is more than a membership—it's your first step toward lasting change."
-        </p>
-
-        <div class="actions">
-            <a href="/member" class="btn">Start Quitting</a>
+        <div class="success-message">
+            Congratulations! Your membership has been successfully upgraded.
+            <br>Welcome to your new plan!
         </div>
 
+        <div class="order-details" th:if="${orderCode}">
+            <h3>Payment Details</h3>
+            <div class="detail-row">
+                <span class="detail-label">Order Code:</span>
+                <span class="detail-value" th:text="${orderCode}">12345</span>
+            </div>
+            <div class="detail-row" th:if="${membershipType}">
+                <span class="detail-label">Membership:</span>
+                <span class="detail-value">
+                    <span class="membership-badge"
+                          th:class="${membershipType == 'VIP' ? 'membership-badge membership-vip' : 'membership-badge membership-premium'}"
+                          th:text="${membershipType}">VIP</span>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value" style="color: #28a745;">
+                    <i class="fas fa-check"></i> Completed
+                </span>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/dashboard" class="btn btn-primary">
+                <i class="fas fa-tachometer-alt"></i>
+                View Dashboard
+            </a>
+            <a href="/member" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Back to Plans
+            </a>
+        </div>
     </div>
-</div>
-
 </body>
 </html>
+

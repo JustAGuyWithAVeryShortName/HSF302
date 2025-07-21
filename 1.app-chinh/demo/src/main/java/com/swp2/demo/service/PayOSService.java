@@ -38,12 +38,18 @@ public class PayOSService {
         try {
             long orderCode = System.currentTimeMillis();
 
+            // Truncate description to maximum 25 characters for PayOS API
+            String description = request.getDescription();
+            if (description != null && description.length() > 25) {
+                description = description.substring(0, 25);
+            }
+
             PaymentData data = PaymentData.builder()
                     .amount(request.getAmount())
-                    .description(request.getDescription())
+                    .description(description)
                     .orderCode(orderCode)
-                    .cancelUrl(REDIRECT_URI + "/payment/api/payments/cancel")
-                    .returnUrl(REDIRECT_URI + "/payment/api/payments/success")
+                    .cancelUrl(REDIRECT_URI + "/member/cancel?orderCode=" + orderCode)
+                    .returnUrl(REDIRECT_URI + "/member/success?orderCode=" + orderCode)
                     .build();
 
             System.out.println("📤 Gửi thanh toán: orderCode = " + orderCode + ", amount = " + request.getAmount());

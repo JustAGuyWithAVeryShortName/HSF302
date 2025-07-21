@@ -15,9 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.swp2.demo.entity.Member;
 import com.swp2.demo.entity.dto.PaymentRequestDTO;
 import com.swp2.demo.entity.dto.PaymentResponeDTO;
+import com.swp2.demo.service.MemberService;
 import com.swp2.demo.service.PayOSService;
+import com.swp2.demo.service.UserService;
 
 
 @Slf4j
@@ -28,9 +31,15 @@ public class PaymentController {
     @Value("${webhook.base-uri}")
     private String webhookBaseUri;
     private final PayOSService payOSService;
-    public PaymentController(PayOSService payOSService) {
+    private final MemberService memberService;
+    private final UserService userService;
+
+    public PaymentController(PayOSService payOSService, MemberService memberService, UserService userService) {
         this.payOSService = payOSService;
+        this.memberService = memberService;
+        this.userService = userService;
     }
+
     @PostMapping("/create")
     public ResponseEntity<PaymentResponeDTO> createPayment(@RequestBody PaymentRequestDTO request) {
 
@@ -70,6 +79,9 @@ public class PaymentController {
                 case "00" -> {
                     log.info("✅ Payment successful | OrderCode: {} | Amount: {} | Description: {}",
                             data.getOrderCode(), data.getAmount(), data.getDesc());
+
+                    // Process membership upgrade for successful payments
+                    processMembershipUpgrade(data);
                 }
                 case "01" -> {
                     log.info("❌ Payment canceled | OrderCode: {} | Description: {}",
@@ -91,6 +103,40 @@ public class PaymentController {
             return ResponseEntity.internalServerError().body("Webhook processing failed");
         }
     }
+
+    private void processMembershipUpgrade(WebhookData data) {
+        try {
+            // Extract membership type from payment description
+            String description = data.getDesc();
+            Member targetMembership = extractMembershipFromDescription(description);
+
+            if (targetMembership != null) {
+                // In a real implementation, you should store user-order mapping
+                // For now, we'll need to implement a way to track which user made the payment
+                log.info("🎯 Processing membership upgrade to {} for order {}",
+                    targetMembership, data.getOrderCode());
+
+                // TODO: Implement user identification from order tracking
+                // This could be done by storing orderCode -> userId mapping when payment is created
+            }
+        } catch (Exception e) {
+            log.error("❌ Failed to process membership upgrade for order {}: {}",
+                data.getOrderCode(), e.getMessage());
+        }
+    }
+
+    private Member extractMembershipFromDescription(String description) {
+        if (description == null) return null;
+
+        String upperDesc = description.toUpperCase();
+        if (upperDesc.contains("VIP")) {
+            return Member.VIP;
+        } else if (upperDesc.contains("PREMIUM")) {
+            return Member.PREMIUM;
+        }
+        return null;
+    }
+
     @PostMapping("/confirm-webhook")
     public ResponseEntity<String> confirmWebhook() {
         // Remove /payment since it's already in context-path
