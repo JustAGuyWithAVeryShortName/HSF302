@@ -176,7 +176,18 @@ button[type="submit"]:active {
 .password-input input {
     padding-right: 60px;
 }
-
+#toggleConfirmPassword{
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    user-select: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
 #togglePassword {
     position: absolute;
     right: 10px;

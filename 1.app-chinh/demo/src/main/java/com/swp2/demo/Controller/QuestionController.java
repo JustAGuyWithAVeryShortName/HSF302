@@ -5,6 +5,7 @@ import com.swp2.demo.repository.OptionRepository;
 import com.swp2.demo.repository.QuestionRepository;
 import com.swp2.demo.repository.UserAnswerRepository;
 import com.swp2.demo.entity.*;
+import com.swp2.demo.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,20 +40,32 @@ public class QuestionController {
         return "question";  // Thymeleaf template
     }
 
+
+    @Autowired
+    private UserService userService;
     // POST: Xử lý câu trả lời
     @PostMapping("/questionnaire")
     @Transactional
     public String handleSurveySubmission(@RequestParam Map<String, String> formData,
                                          HttpSession session,
                                          Model model) {
-
-        User user = (User) session.getAttribute("loggedInUser");
-
-        if (user == null) {
+// sửa 7/7
+        User sessionUser = (User) session.getAttribute("loggedInUser");
+        if (sessionUser == null) {
             System.out.println("Không có user trong session. Chuyển hướng login.");
             return "redirect:/login";
         }
 
+        User user = userService.findById(sessionUser.getId());
+        session.setAttribute("loggedInUser", user);
+
+
+//        User user = (User) session.getAttribute("loggedInUser");
+//        if (user == null) {
+//            System.out.println("Không có user trong session. Chuyển hướng login.");
+//            return "redirect:/login";
+//        }
+//=============================================================
       //  System.out.println("✅ Đã login với user: " + user.getUsername());
 
         userAnswerRepository.deleteByUser(user);

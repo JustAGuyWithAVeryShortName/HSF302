@@ -63,8 +63,9 @@ function connectSocket() {
         return;
     }
 
-    const socket = new SockJS("http://localhost:8080/ws");
+    const socket = new SockJS("/ws"); // ✅ Đơn giản và đúng nhất nếu cùng host
     stompClient = Stomp.over(socket);
+
 
     stompClient.connect({}, function (frame) {
         console.log('Connected to STOMP: ' + frame);

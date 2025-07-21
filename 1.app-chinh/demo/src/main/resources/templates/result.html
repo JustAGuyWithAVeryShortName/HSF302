@@ -42,25 +42,42 @@
       <a th:href="@{/questionnaire}" class="button button--secondary">Redo the survey</a>
     </div>
 
-    <div class="right-buttons">
+     <!-- <div class="right-buttons">
+        <a th:if="${user.role == T(com.swp2.demo.entity.Role).Member}"
+           th:href="@{/quit-plan}"
+           class="button button--success">
+          Start Quitting
+        </a>
 
-      <!-- Nếu user là Member -->
-      <a th:if="${user.role == T(com.swp2.demo.entity.Role).Member}"
+        <a th:if="${user.role != T(com.swp2.demo.entity.Role).Member}"
+           th:href="@{/member}"
+           class="button button--success">
+          Start Quitting
+        </a>
+      </div>-->
+
+    <div class="right-buttons">
+      <!-- Nếu user có role là Member và member là VIP hoặc PREMIUM -->
+      <a th:if="${user != null
+             and user.role.name() == 'Member'
+             and (user.member.name() == 'VIP' or user.member.name() == 'PREMIUM')}"
          th:href="@{/quit-plan}"
          class="button button--success">
         Start Quitting
       </a>
 
-      <!-- Nếu user KHÔNG phải Member -->
-      <a th:if="${user.role != T(com.swp2.demo.entity.Role).Member}"
+      <!-- Nếu KHÔNG thỏa điều kiện trên -->
+      <a th:if="${user == null
+             or user.role.name() != 'Member'
+             or (user.member.name() != 'VIP' and user.member.name() != 'PREMIUM')}"
          th:href="@{/member}"
          class="button button--success">
         Start Quitting
       </a>
-
     </div>
 
 
+  </div>
   </div>
 </body>
 </html>

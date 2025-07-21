@@ -207,7 +207,7 @@ public class QuitPlanController {
         LocalDate endDate = currentPlan.getTargetDate();
 
         if (today.isAfter(endDate)) {
-            String todayMessage = "🎉 Bạn đã hoàn thành kế hoạch cai thuốc!";
+            String todayMessage = "🎉 You have completed your quit smoking plan.!";
             boolean exists = notificationRepository.existsByUserIdAndContentAndCreatedAtBetween(
                     user.getId(),
                     todayMessage,
@@ -225,9 +225,9 @@ public class QuitPlanController {
 
             String todayMessage;
             if (daysPassed == 0) {
-                todayMessage = "🚀 Chúc mừng bạn đã bắt đầu kế hoạch cai thuốc hôm nay! Cố lên!";
+                todayMessage = "🚀 Congratulations on starting your quit smoking plan today! Keep it up!";
             } else {
-                todayMessage = "Bạn đã cai được " + daysPassed + " ngày! Cố lên, còn " + daysLeft + " ngày nữa!";
+                todayMessage = "You've been smoke-free for " + daysPassed + " days! Keep it up, only " + daysLeft + " days to go!";
             }
 
             boolean exists = notificationRepository.existsByUserIdAndContentAndCreatedAtBetween(

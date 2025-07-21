@@ -12,4 +12,7 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     long countByStatus(String status);
     Optional<Order> findFirstByUserAndMemberPlanAndStatus(User user, Member memberPlan, String status);
+
+    // 7/7
+    Optional<Order> findTopByUserOrderByCreatedAtDesc(User user);
 }

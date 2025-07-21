@@ -56,7 +56,12 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/", "/home", "/register/**", "/login", "/css/**", "/images/**", "/js/**",
                                 "/member", "/forgot-password", "/reset-password",
-                                "/ws/**","/about_us","/.well-known/**"
+                                "/ws/**","/about_us","/.well-known/**",
+                            "/payment/api/payments/create", // <-- ADD THIS LINE
+                            "/payment/api/payments/webhook", // <-- ADD THIS LINE for the webhook callback
+                            "/payment/api/payments/confirm-webhook", // <-- ADD THIS LINE for webhook confirmation
+                            "/payment/api/payments/success", // <-- ADD THIS LINE for successful redirect from PayOS
+                            "/payment/api/payments/cancel"   // <-- ADD THIS LINE for cancel redirect from PayOS
 
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/questionnaire").permitAll()

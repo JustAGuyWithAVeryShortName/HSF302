@@ -1,7 +1,3 @@
-
-
-
-
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 
@@ -10,12 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Membership - SmokeLite</title>
 
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link rel="stylesheet" th:href="@{/css/member.css}">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=serrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-</head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> </head>
 
 <body>
 
@@ -79,8 +77,10 @@
                     <div th:if="${currentMember?.name() == 'FREE'}">
                         <button class="btn-current" disabled>Current Plan</button>
                     </div>
-                    <form th:if="${currentMember == null or currentMember.name() != 'FREE'}" th:action="@{/payment}" method="get">
+                    <form class="payment-form" th:if="${currentMember == null or currentMember.name() != 'FREE'}">
                         <input type="hidden" name="plan" value="FREE" />
+                        <input type="hidden" name="amount" value="0" />
+                        <input type="hidden" name="description" value="Basic Membership Plan" />
                         <button type="submit">Choose Plan</button>
                     </form>
                 </div>
@@ -98,8 +98,10 @@
                     <div th:if="${currentMember?.name() == 'VIP'}">
                         <button class="btn-current" disabled>Current Plan</button>
                     </div>
-                    <form th:if="${currentMember == null or currentMember.name() != 'VIP'}" th:action="@{/payment}" method="get">
+                    <form class="payment-form" th:if="${currentMember == null or currentMember.name() != 'VIP'}">
                         <input type="hidden" name="plan" value="VIP" />
+                        <input type="hidden" name="amount" value="5000" />
+                        <input type="hidden" name="description" value="VIP Membership Plan" />
                         <button type="submit">Choose Plan</button>
                     </form>
                 </div>
@@ -118,8 +120,10 @@
                     <div th:if="${currentMember?.name() == 'PREMIUM'}">
                         <button class="btn-current" disabled>Current Plan</button>
                     </div>
-                    <form th:if="${currentMember == null or currentMember.name() != 'PREMIUM'}" th:action="@{/payment}" method="get">
+                    <form class="payment-form" th:if="${currentMember == null or currentMember.name() != 'PREMIUM'}">
                         <input type="hidden" name="plan" value="PREMIUM" />
+                        <input type="hidden" name="amount" value="10000" />
+                        <input type="hidden" name="description" value="Premium Membership Plan" />
                         <button type="submit">Choose Plan</button>
                     </form>
                 </div>
@@ -128,35 +132,161 @@
     </section>
 </main>
 <script>
-    const navToggle = document.querySelector('.nav-toggle');
-    const primaryNav = document.querySelector('#primary-navigation');
-    const icon = navToggle.querySelector('i');
+    document.addEventListener('DOMContentLoaded', function() {
+        const navToggle = document.querySelector('.nav-toggle');
+        const primaryNav = document.querySelector('#primary-navigation');
 
-    navToggle.addEventListener('click', () => {
-        const isVisible = primaryNav.getAttribute('data-visible') === 'true';
+        const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
 
-        if (isVisible) {
-            primaryNav.setAttribute('data-visible', 'false');
-            navToggle.setAttribute('aria-expanded', 'false');
-            icon.classList.remove('fa-xmark');
-            icon.classList.add('fa-bars');
-        } else {
-            primaryNav.setAttribute('data-visible', 'true');
-            navToggle.setAttribute('aria-expanded', 'true');
-            icon.classList.remove('fa-bars');
-            icon.classList.add('fa-xmark');
+        const icon = navToggle ? navToggle.querySelector('i') : null; // Check if navToggle exists
+
+        let csrfToken = null;
+        let csrfHeaderName = null;
+
+        if (navToggle) {
+            navToggle.addEventListener('click', () => {
+                const isVisible = primaryNav.getAttribute('data-visible') === 'true';
+
+                if (isVisible) {
+                    primaryNav.setAttribute('data-visible', 'false');
+                    navToggle.setAttribute('aria-expanded', 'false');
+                    if (icon) { // Check if icon exists
+                        icon.classList.remove('fa-xmark');
+                        icon.classList.add('fa-bars');
+                    }
+                } else {
+                    primaryNav.setAttribute('data-visible', 'true');
+                    navToggle.setAttribute('aria-expanded', 'true');
+                    if (icon) { // Check if icon exists
+                        icon.classList.remove('fa-bars');
+                        icon.classList.add('fa-xmark');
+                    }
+                }
+            });
+        }
+        if (csrfTokenMeta && csrfHeaderMeta) {
+            csrfToken = csrfTokenMeta.getAttribute('content');
+            csrfHeaderName = csrfHeaderMeta.getAttribute('content');
+        }
+
+        // Handle payment form submissions
+        document.querySelectorAll('.payment-form').forEach(form => {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                const planName = this.querySelector('input[name="plan"]').value;
+                const amount = parseInt(this.querySelector('input[name="amount"]').value);
+                const description = this.querySelector('input[name="description"]').value;
+
+                // Handle FREE plan separately if no API call is needed
+                if (planName === 'FREE' && amount === 0) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Basic Plan Selected!',
+                        text: 'You have successfully chosen the Basic (FREE) membership plan.',
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        window.location.href = '/dashboard';
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Redirecting to Payment...',
+                    text: 'Please wait while we prepare your payment.',
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                });
+
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+
+                // Add CSRF token to headers if available
+                if (csrfToken && csrfHeaderName) {
+                    headers[csrfHeaderName] = csrfToken;
+                }
+
+                // Send data to your Spring Boot backend
+                fetch('/api/payments/create', { // <--- REMOVED '/payment' from the URL
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        amount: amount,
+                        description: description
+                    })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errorData => {
+                                // Check for specific forbidden message for clarity
+                                if (response.status === 403) {
+                                    throw new Error('Forbidden: Your session may have expired or you do not have permission. Please try logging in again.');
+                                }
+                                throw new Error(errorData.message || 'Failed to create payment link.');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        Swal.close();
+
+                        if (data && data.checkoutUrl) {
+                            window.location.href = data.checkoutUrl;
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Payment Error',
+                                text: 'Received invalid response from payment service. Please try again.',
+                            });
+                            console.error('Invalid response:', data);
+                        }
+                    })
+                    .catch(error => {
+                        Swal.close();
+                        console.error('Error creating payment link:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Payment Failed',
+                            text: error.message || 'An unexpected error occurred while processing your request. Please try again later.',
+                        });
+                    });
+            });
+        });
+
+        // Nút back to top
+        const backToTopButton = document.querySelector('.back-to-top');
+        if (backToTopButton) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 200) { // Show button after scrolling 200px
+                    backToTopButton.style.display = 'block';
+                } else {
+                    backToTopButton.style.display = 'none';
+                }
+            });
+
+            backToTopButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
         }
     });
 </script>
 </body>
 
 </html>
-<!-- Nút back to top -->
 <a href="#" class="back-to-top"><i class="fas fa-arrow-up"></i></a>
 
 </body>
 </html>
-<!-- ==== FOOTER ==== -->
 <footer class="main-footer">
     <div class="container">
         <div class="footer-address">
