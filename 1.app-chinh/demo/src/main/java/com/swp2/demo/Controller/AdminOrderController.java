@@ -28,7 +28,7 @@ public class AdminOrderController {
 
     @GetMapping
     public String listOrders(Model model) {
-        List<Order> orders = orderRepository.findAll();
+        List<Order> orders = orderRepository.findAllWithUser();
         model.addAttribute("orders", orders);
         return "admin-orders";
     }

@@ -117,6 +117,8 @@ public class MemberController {
 
                 memberService.upgradeMembership(user, newMembership);
 
+//                Member newMembership = memberService.getMembershipByOrderCode(orderCode);
+//                memberService.upgradeMembership(user, newMembership);
                 model.addAttribute("success", true);
                 model.addAttribute("membershipType", newMembership.name());
                 model.addAttribute("orderCode", orderCode);

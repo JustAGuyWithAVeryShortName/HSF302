@@ -1,6 +1,14 @@
 package com.swp2.demo.Controller;
 
+
+import com.swp2.demo.entity.Order;
+import com.swp2.demo.entity.Role;
+import com.swp2.demo.entity.User;
+
+import com.swp2.demo.repository.OrderRepository;
+import com.swp2.demo.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import vn.payos.type.Webhook;
 import vn.payos.type.WebhookData;
 
@@ -21,6 +29,8 @@ import com.swp2.demo.entity.dto.PaymentResponeDTO;
 import com.swp2.demo.service.MemberService;
 import com.swp2.demo.service.PayOSService;
 import com.swp2.demo.service.UserService;
+
+import java.time.LocalDateTime;
 
 
 @Slf4j
@@ -104,21 +114,42 @@ public class PaymentController {
         }
     }
 
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     private void processMembershipUpgrade(WebhookData data) {
         try {
             // Extract membership type from payment description
             String description = data.getDesc();
             Member targetMembership = extractMembershipFromDescription(description);
+            Long orderCode = data.getOrderCode();
 
-            if (targetMembership != null) {
-                // In a real implementation, you should store user-order mapping
-                // For now, we'll need to implement a way to track which user made the payment
-                log.info("🎯 Processing membership upgrade to {} for order {}",
-                    targetMembership, data.getOrderCode());
-
-                // TODO: Implement user identification from order tracking
-                // This could be done by storing orderCode -> userId mapping when payment is created
+            if (targetMembership == null) {
+                log.warn("❗ Không tìm thấy loại thành viên phù hợp từ mô tả: {}", description);
+                return;
             }
+
+            Order order = orderRepository.findByOrderCode(orderCode)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng: " + orderCode));
+
+            User user = order.getUser();
+            if (user == null) {
+                log.error("❌ Đơn hàng không có người dùng gắn với orderCode: {}", orderCode);
+                return;
+            }
+
+            order.setStatus("PAID");
+            order.setConfirmedAt(LocalDateTime.now());
+            orderRepository.save(order);
+
+            user.setMember(targetMembership);
+            user.setRole(Role.Member); // đảm bảo đúng tên enum/chuỗi bạn dùng
+            userRepository.save(user);
+
+            log.info("✅ Đã nâng cấp user {} lên gói {} với orderCode {}", user.getEmail(), targetMembership, orderCode);
         } catch (Exception e) {
             log.error("❌ Failed to process membership upgrade for order {}: {}",
                 data.getOrderCode(), e.getMessage());

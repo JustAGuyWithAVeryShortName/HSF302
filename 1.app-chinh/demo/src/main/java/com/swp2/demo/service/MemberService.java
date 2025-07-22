@@ -1,14 +1,19 @@
 package com.swp2.demo.service;
 
 import com.swp2.demo.entity.Member;
+import com.swp2.demo.entity.Order;
+import com.swp2.demo.entity.Role;
 import com.swp2.demo.entity.User;
 import com.swp2.demo.entity.dto.PaymentRequestDTO;
 import com.swp2.demo.entity.dto.PaymentResponeDTO;
+import com.swp2.demo.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
@@ -53,13 +58,35 @@ public class MemberService {
         return payOSService.createPaymentLink(paymentRequest);
     }
 
+    @Autowired
+    private OrderRepository orderRepository;
     @Transactional
     public void upgradeMembership(User user, Member newMember) {
         user.setMember(newMember);
+
+        // Chỉ cập nhật role nếu là VIP hoặc PREMIUM
+        if (newMember == Member.VIP || newMember == Member.PREMIUM) {
+            user.setRole(Role.Member);
+        }
         userService.save(user);
 
         log.info("User {} successfully upgraded to {} membership",
             user.getEmail(), newMember);
+
+        // Nếu là FREE thì tạo Order để admin nhìn thấy
+        Order order = new Order();
+        order.setUser(user);
+        order.setAmount(
+                newMember == Member.VIP ? 5000.0 :
+                        newMember == Member.PREMIUM ? 10000.0 : 0.0
+        );
+        order.setStatus("PAID");
+        order.setMemberPlan(newMember);
+        order.setConfirmedAt(LocalDateTime.now());
+        order.setOrderCode(System.currentTimeMillis());
+
+        orderRepository.save(order);
+            log.info("✅ Created FREE order for user {}", user.getEmail());
     }
 
     public boolean canUpgradeToMembership(User user, Member targetMember) {

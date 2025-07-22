@@ -129,11 +129,11 @@
     function handleSupportClick(el) {
         const memberType = el.getAttribute("data-member");
 
-        if ( memberType === 'PREMIUM') {
+        if ( memberType === 'VIP') {
             window.location.href = '/messenger';
         } else {
             // Hiện thông báo tùy ý
-            alert("This feature is available for PREMIUM members only.\nPlease upgrade your plan to access support.");
+            alert("This feature is available for PREMIUM and VIP members only.\nPlease upgrade your plan to access support.");
         }
     }
 </script>

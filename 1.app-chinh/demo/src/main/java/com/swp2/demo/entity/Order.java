@@ -28,6 +28,18 @@ public class Order {
 
     private LocalDateTime confirmedAt;
 
+    @Column(name = "order_code", unique = true)
+    private Long orderCode;
+
+
+    public Long getOrderCode() {
+        return orderCode;
+    }
+
+    public void setOrderCode(Long orderCode) {
+        this.orderCode = orderCode;
+    }
+
     public Long getId() {
         return id;
     }

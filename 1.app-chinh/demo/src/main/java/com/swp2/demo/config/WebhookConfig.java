@@ -17,7 +17,7 @@ public class WebhookConfig implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        String webHookUrl = webhookBaseUri + "/payment/api/payments/webhook";
+        String webHookUrl = webhookBaseUri + "/api/payments/webhook";
         try {
             String result = payOS.confirmWebhook(webHookUrl);
             System.out.println("✅ Webhook confirmed: " + result);

@@ -21,4 +21,4 @@ springdoc:
     operations-sorter: method
 
 webhook:
-  base-uri: ${WEBHOOK_BASE_URI:https://0fb1d3e2bc11.ngrok-free.app}
+  base-uri: ${WEBHOOK_BASE_URI:https://18475e76a57b.ngrok-free.app}
