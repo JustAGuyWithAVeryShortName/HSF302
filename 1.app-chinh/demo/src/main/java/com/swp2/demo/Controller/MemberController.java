@@ -132,10 +132,10 @@ public class MemberController {
     }
 
     @GetMapping("/member/cancel")
-    public String paymentCancel(@RequestParam(required = false) Long orderCode, Model model) {
-        model.addAttribute("orderCode", orderCode);
-        return "cancel";
+    public String paymentCancel(@RequestParam(required = false) Long orderCode) {
+        return "redirect:/api/payments/cancel?orderCode=" + orderCode;
     }
+
 
     private User getCurrentUser(Object principal) {
         if (principal instanceof CustomUserDetails userDetails) {

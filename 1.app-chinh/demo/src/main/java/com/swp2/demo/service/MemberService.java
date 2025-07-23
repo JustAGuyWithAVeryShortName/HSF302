@@ -55,7 +55,7 @@ public class MemberService {
         log.info("Creating payment for user {} to upgrade to {} membership",
             user.getEmail(), targetMember);
 
-        return payOSService.createPaymentLink(paymentRequest);
+        return payOSService.createPaymentLink(paymentRequest, user);
     }
 
     @Autowired

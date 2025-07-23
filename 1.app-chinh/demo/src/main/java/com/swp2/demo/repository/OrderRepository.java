@@ -23,6 +23,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.user")
     List<Order> findAllWithUser();
 
-
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.user")
+    List<Order> findAllOrdersWithUser();
 
 }

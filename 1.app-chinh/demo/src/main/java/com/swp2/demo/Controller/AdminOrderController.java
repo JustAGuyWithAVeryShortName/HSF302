@@ -28,7 +28,8 @@ public class AdminOrderController {
 
     @GetMapping
     public String listOrders(Model model) {
-        List<Order> orders = orderRepository.findAllWithUser();
+        // Sử dụng phương thức mới để lấy tất cả orders
+        List<Order> orders = orderRepository.findAllOrdersWithUser();
         model.addAttribute("orders", orders);
         return "admin-orders";
     }
@@ -36,29 +37,15 @@ public class AdminOrderController {
     @PostMapping("/{orderId}/confirm")
     public String confirmOrder(@PathVariable Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
-        if ("PAID".equals(order.getStatus())) {
-            return "redirect:/admin/orders"; // Already confirmed, do nothing
+        if ("UNPAID".equals(order.getStatus())) {
+            order.setStatus("PAID");
+            order.setConfirmedAt(LocalDateTime.now());
+            orderRepository.save(order);
         }
 
-        order.setStatus("PAID");
-        order.setConfirmedAt(LocalDateTime.now());
-
-        // Update User's member plan AND role
-        User user = order.getUser();
-        if (user != null) {
-            user.setMember(order.getMemberPlan());
-            // Set the user's role to MEMBER
-            user.setRole(Role.Member); // <--- ADD THIS LINE
-            userRepository.save(user);
-
-
-        }
-
-        orderRepository.save(order);
-
-        return "redirect:/admin/orders"; // Redirect to the order management page
+        return "redirect:/admin/orders";
     }
 
     @PostMapping("/{orderId}/delete")

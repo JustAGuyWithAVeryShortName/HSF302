@@ -1,7 +1,13 @@
 package com.swp2.demo.service;
 
+import com.swp2.demo.entity.Member;
+import com.swp2.demo.entity.Order;
+import com.swp2.demo.entity.User;
+import com.swp2.demo.repository.OrderRepository;
+import com.swp2.demo.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import vn.payos.PayOS;
 import vn.payos.type.PaymentData;
 import vn.payos.type.PaymentLinkData;
@@ -34,11 +40,26 @@ public class PayOSService {
     private final PayOSConfig payOSConfig;
     @Autowired
     private final PayOS payOS;
-    public PaymentResponeDTO createPaymentLink(PaymentRequestDTO request) {
+
+    @Autowired
+    private final OrderRepository orderRepository;
+
+    @Autowired
+    private UserService userService;
+
+    public PaymentResponeDTO createPaymentLink(PaymentRequestDTO request,User user ) {
         try {
             long orderCode = System.currentTimeMillis();
 
-            // Truncate description to maximum 25 characters for PayOS API
+
+            Order order = new Order();
+            order.setUser(user);
+            order.setMemberPlan(Member.VIP);
+            order.setOrderCode(orderCode);
+            order.setAmount(request.getAmount().doubleValue());
+            order.setStatus("CREATED"); // hoặc "UNPAID"
+            orderRepository.save(order);
+
             String description = request.getDescription();
             if (description != null && description.length() > 25) {
                 description = description.substring(0, 25);
@@ -78,6 +99,15 @@ public class PayOSService {
     }
     public PaymentLinkData cancelPayment(long orderCode, String reason) {
         try {
+            // Kiểm tra và cập nhật đơn hàng trong database
+            Order order = orderRepository.findByOrderCode(orderCode)
+                    .orElseThrow(() -> new RuntimeException("Order not found"));
+            log.info("eee");
+            order.setStatus("CANCELLED");
+            log.info("zzzz");
+            orderRepository.save(order);
+
+            // Hủy thanh toán trên PayOS
             return payOS.cancelPaymentLink(orderCode, reason);
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi hủy đơn hàng", e);
@@ -119,5 +149,15 @@ public class PayOSService {
         } catch (Exception e) {
             log.error("❌ Unexpected error while confirming webhook", e);
         }
+    }
+
+    private User getCurrentUser(Object principal) {
+        if (principal instanceof CustomUserDetails userDetails) {
+            return userService.findById(userDetails.getId());
+        } else if (principal instanceof OAuth2User oauth2User) {
+            String email = oauth2User.getAttribute("email");
+            return userService.findByEmail(email);
+        }
+        return null;
     }
 }

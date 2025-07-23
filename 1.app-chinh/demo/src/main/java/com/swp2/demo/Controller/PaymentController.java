@@ -7,8 +7,11 @@ import com.swp2.demo.entity.User;
 
 import com.swp2.demo.repository.OrderRepository;
 import com.swp2.demo.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
 import vn.payos.type.Webhook;
 import vn.payos.type.WebhookData;
 
@@ -51,11 +54,13 @@ public class PaymentController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<PaymentResponeDTO> createPayment(@RequestBody PaymentRequestDTO request) {
+    public ResponseEntity<PaymentResponeDTO> createPayment(HttpSession session, @RequestBody PaymentRequestDTO request) {
 
         PaymentResponeDTO responsePayment;
+        User user = (User) session.getAttribute("loggedInUser");
+
         try {
-            responsePayment = payOSService.createPaymentLink(request);
+            responsePayment = payOSService.createPaymentLink(request, user);
             return ResponseEntity.ok(responsePayment);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

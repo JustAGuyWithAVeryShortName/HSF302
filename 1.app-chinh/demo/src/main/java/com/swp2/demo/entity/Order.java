@@ -95,4 +95,13 @@ public class Order {
     public void setConfirmedAt(LocalDateTime confirmedAt) {
         this.confirmedAt = confirmedAt;
     }
+
+
+    public Order(Long id, Double amount, String status) {
+        this.id = id;
+        this.amount = amount;
+        this.status = status;
+    }
+
+    public Order() {}
 }

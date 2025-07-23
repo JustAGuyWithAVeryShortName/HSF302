@@ -73,6 +73,28 @@
       text-align: center;
     }
 
+    /* Thêm vào phần style */
+    .badge {
+      padding: 0.5em 0.75em;
+      border-radius: 0.5rem;
+      font-weight: 500;
+    }
+
+    .bg-success { background-color: var(--success-color); }
+    .bg-warning { background-color: #ffc107; color: #000; }
+    .bg-danger { background-color: var(--danger-color); }
+
+    .action-buttons form {
+      margin: 0;
+    }
+
+    /* Responsive cho mobile */
+    @media (max-width: 768px) {
+      .action-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
     .sidebar .nav-link:hover {
       background-color: var(--primary-color-light);
       color: var(--primary-color);
@@ -273,14 +295,27 @@
           <td th:text="${order.user.username}">username</td>
           <td th:text="${order.memberPlan}">Gói A</td>
           <td th:text="${order.amount}">100000</td>
-          <td th:text="${order.status}">UNPAID</td>
+          <td>
+            <span th:if="${order.status == 'PAID'}" class="badge bg-success">Đã thanh toán</span>
+            <span th:if="${order.status == 'UNPAID'}" class="badge bg-warning">Chưa thanh toán</span>
+            <span th:if="${order.status == 'CANCELLED'}" class="badge bg-danger">Đã hủy</span>
+          </td>
           <td>
             <div class="action-buttons">
+              <!-- Nút xác nhận chỉ hiển thị cho đơn chưa thanh toán -->
+              <form th:if="${order.status == 'UNPAID'}"
+                    th:action="@{'/admin/orders/' + ${order.id} + '/confirm'}"
+                    method="post">
+                <button type="submit" class="confirm-btn">
+                  <i class="bi bi-check-circle-fill"></i> Xác nhận
+                </button>
+              </form>
 
+              <!-- Nút xóa -->
               <form th:action="@{'/admin/orders/' + ${order.id} + '/delete'}" method="post"
-                    onsubmit="return confirm('Are you sure you want to delete this order ?');">
+                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">
                 <button type="submit" class="delete-btn">
-                  <i class="bi bi-trash-fill"></i> Delete
+                  <i class="bi bi-trash-fill"></i> Xóa
                 </button>
               </form>
             </div>
